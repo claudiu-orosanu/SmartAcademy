@@ -20,6 +20,8 @@ Route::prefix('v1')->group(function () {
         return $request->user();
     });
 
+    Route::apiResource('courses', 'CourseController');
+
     Route::get('/test', function (Request $request) {
         return response(json_encode([1, 2, 3, 4]), 200);
     });

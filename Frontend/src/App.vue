@@ -1,29 +1,18 @@
 <template>
   <v-app>
 
-    <!--right sidebar menu-->
-    <v-navigation-drawer app v-model="sideNav" persistent clipped>
-      <v-list>
-        <v-list-tile>
-          <v-list-tile-action>
-            <v-icon>supervisor_account</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            View professors
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-navigation-drawer>
+    <!--left sidebar menu-->
+    <app-sidebar-menu :side-nav="sideNav"></app-sidebar-menu>
 
     <!--top navigation menu-->
     <v-toolbar app dark class="primary" clipped-left>
       <v-toolbar-side-icon @click.stop="sideNav = !sideNav"></v-toolbar-side-icon>
-      <v-toolbar-title>Smart Academy</v-toolbar-title>
+      <router-link tag="v-toolbar-title" to="/" style="cursor: pointer">Smart Academy</router-link>
       <v-spacer></v-spacer>
       <v-toolbar-items>
         <v-btn flat dark>
-          <v-icon left>supervisor_account</v-icon>
-          View professors
+          <v-icon left>account_circle</v-icon>
+          Claudiu
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
@@ -42,12 +31,20 @@
 </template>
 
 <script>
+  import SidebarMenu from './components/SidebarMenu'
+
   export default {
+    name: 'App',
+
+    components: {
+      'app-sidebar-menu': SidebarMenu
+    },
+
     data () {
       return {
-        sideNav: false
+        sideNav: true
       }
     },
-    name: 'App'
+
   }
 </script>
