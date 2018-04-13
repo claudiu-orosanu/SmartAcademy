@@ -13,21 +13,34 @@ class CourseController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return CourseCollection
      */
     public function index(Request $request)
     {
-        return CourseResource::collection(Course::all());
+        //return CourseResource::collection(Course::all());
 
-        /*TODO pagination
-        Make a request with query string params that are required (page, itemsPerPage, columns)
-        ex: /courses?page=1&&itemsPerPage=5
+        // initialize course model
+        $courseModel = new Course();
 
-        Note: you can navigate to the next page (from frontend) by following the 'next' link in the response.data.links
-        */
+        // filter by category
+        if($request->query('categories') !== null){
+            $courseModel = $courseModel->whereIn('category', $request->query('categories'));
+        }
 
-        //dd($request->query());
-        //return new CourseCollection(Course::paginate(6, ['*'], 'page', 1));
+        // search by name
+        if($request->query('search') !== null){
+            $searchTerm = '%'. $request->query('search') . '%';
+            $courseModel = $courseModel->where('name', 'ILIKE', $searchTerm);
+        }
+
+        // find and return paginated courses
+        $paginatedCourses = $courseModel->paginate(
+                $request->query('itemsPerPage'),
+                ['*'],
+                'page',
+                $request->query('page'));
+
+        return new CourseCollection($paginatedCourses);
 
     }
 

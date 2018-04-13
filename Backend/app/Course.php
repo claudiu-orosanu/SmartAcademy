@@ -27,6 +27,12 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Course extends Model
 {
+    public static $courseCategories = [
+        'Data science' => 0,
+        'Computer science' => 1,
+        'Math' => 2
+    ];
+
     protected $fillable = [
         'name',
         'description',
