@@ -66,7 +66,7 @@
           </v-card>
         </v-flex>
       </v-layout>
-      <infinite-loading @infinite="infiniteHandler" ref="infiniteLoading">
+      <infinite-loading @infinite="infiniteHandler" ref="infiniteLoading" spinner="spiral">
         <span slot='no-more'>
           No more courses :(
         </span>
@@ -77,11 +77,10 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import InfiniteLoading from 'vue-infinite-loading';
   import _ from 'lodash';
   import constants from '../constants';
-  import config from '../config';
+  import { mapGetters } from 'vuex';
 
   export default {
     name: 'Courses',
@@ -92,7 +91,6 @@
 
     data() {
       return {
-        courses: [],
         showDescription: false,
         categories: constants.courseCategories,
         selectedCategories: [],
@@ -100,41 +98,42 @@
       }
     },
 
+    computed: {
+      ...mapGetters([
+        'courses'
+      ])
+    },
+
     methods: {
       infiniteHandler($state) {
-        let itemsPerPage = 9;
 
-        axios.get(`${config.apiUrl}/courses`, {
-          params: {
-            page: this.courses.length / itemsPerPage + 1,
-            itemsPerPage: itemsPerPage,
-            search: this.searchTerm,
-            categories: this.selectedCategories.map( c => constants.courseCategoriesMapping[c])
-          },
-        })
-          .then(response => {
-            let courses = response.data.data;
-            if (courses.length) {
-              this.courses = this.courses.concat(courses);
-              $state.loaded();
-            } else {
-              $state.complete();
-            }
-          })
-          .catch(err => {
-            console.log(err);
-          })
+        // get courses from store
+        let courses = this.$store.getters.courses;
+
+        let itemsPerPage = 9;
+        let page = courses.length / itemsPerPage + 1;
+
+        let payload = {
+          infHandlerState: $state,
+          itemsPerPage,
+          page,
+          searchTerm: this.searchTerm,
+          categories: this.selectedCategories.map(c => constants.courseCategoriesMapping[c])
+        }
+
+        //get courses from backend API
+        this.$store.dispatch('getPaginatedCourses', payload);
       },
 
       searchTermChanged: _.debounce(function () {
-        this.courses = [];
+        this.$store.dispatch('clearCourses');
         this.$nextTick(() => {
           this.$refs.infiniteLoading.$emit('$InfiniteLoading:reset');
         });
       }, 450),
 
       categoryFilterChanged() {
-        this.courses = [];
+        this.$store.dispatch('clearCourses');
         this.$nextTick(() => {
           this.$refs.infiniteLoading.$emit('$InfiniteLoading:reset');
         });
