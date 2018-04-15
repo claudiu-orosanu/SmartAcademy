@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use \Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,25 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/test', function (Request $request) {
         return response(json_encode([1, 2, 3, 4]), 200);
+    });
+
+    Route::get('/testStorage', function (Request $request) {
+
+//        $path = storage_path('app/public/test.png');
+//        return Image::make($path)->response('png');
+
+//        return Storage::download('public/test.png');
+
+        return Storage::url('test.png');
+    });
+
+    Route::post('/testUpload', function (Request $request) {
+
+//        $path = $request->file('avatar')->store('avatars');
+        $file = $request->file('avatar');
+        $path = Storage::disk('public')->putFile('avatars', $file);
+
+        return Storage::url($path);
     });
 });
 
