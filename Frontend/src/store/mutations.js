@@ -1,8 +1,12 @@
-export const setCourses = (state, payload) => {
-  state.courses = payload;
+export const setCourses = (state, courses) => {
+  state.courses = courses;
 }
 
-export const addCourses = (state, payload) => {
-  state.courses.push(...payload);
+export const addCourses = (state, courses) => {
+  state.courses.push(...courses);
+}
+
+export const setSelectedCourse = (state, course) => {
+  state.selectedCourse = course;
 }
 

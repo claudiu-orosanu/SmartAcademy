@@ -59,11 +59,11 @@ class CourseController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Course  $course
-     * @return \Illuminate\Http\Response
+     * @return CourseResource
      */
     public function show(Course $course)
     {
-        //
+        return new CourseResource($course);
     }
 
     /**

@@ -7,7 +7,8 @@ import * as mutations from './mutations'
 Vue.use(Vuex)
 
 const state = {
-  courses: []
+  courses: [],
+  selectedCourse: {}
 }
 
 const store = new Vuex.Store({

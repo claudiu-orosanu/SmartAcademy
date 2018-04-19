@@ -2,7 +2,52 @@
   <v-app>
 
     <!--left sidebar menu-->
-    <app-sidebar-menu :side-nav="sideNav"></app-sidebar-menu>
+`    <v-navigation-drawer app v-model="sideNav" clipped>
+      <v-toolbar flat class="transparent">
+        <v-list class="pa-0">
+          <v-list-tile avatar>
+            <v-list-tile-avatar>
+              <img src="https://randomuser.me/api/portraits/men/85.jpg">
+            </v-list-tile-avatar>
+            <v-list-tile-content>
+              <v-list-tile-title>Claudiu Orosanu</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </v-toolbar>
+
+      <v-list>
+
+        <!--Courses-->
+        <v-list-group
+          value="true"
+          :prepend-icon="'assignment'"
+          active-class="red--text"
+          no-action
+        >
+          <v-list-tile slot="activator">
+            <v-list-tile-content>
+              <v-list-tile-title>Courses</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+          <router-link to="/courses" tag="v-list-tile">
+            <v-list-tile-content>
+              <v-list-tile-title>Explore</v-list-tile-title>
+            </v-list-tile-content>
+          </router-link>
+        </v-list-group>
+
+        <router-link to="/teachers" tag="v-list-tile">
+          <v-list-tile-action>
+            <v-icon>face</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Teachers</v-list-tile-title>
+          </v-list-tile-content>
+        </router-link>
+
+      </v-list>
+    </v-navigation-drawer>
 
     <!--top navigation menu-->
     <v-toolbar app dark class="primary" clipped-left>
@@ -31,14 +76,8 @@
 </template>
 
 <script>
-  import SidebarMenu from './components/SidebarMenu'
-
   export default {
     name: 'App',
-
-    components: {
-      'app-sidebar-menu': SidebarMenu
-    },
 
     data () {
       return {

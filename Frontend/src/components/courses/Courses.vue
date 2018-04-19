@@ -10,6 +10,8 @@
         </v-flex>
       </v-layout>
     </v-container>
+
+    <!--search & filter container-->
     <v-container>
       <v-layout row>
         <v-flex xs5 md4>
@@ -36,10 +38,12 @@
         </v-flex>
       </v-layout>
     </v-container>
+
+    <!--courses container-->
     <v-container grid-list-xl>
       <v-layout row wrap>
-        <v-flex xs6 sm4 v-for="(course,index) in courses" :key="index">
-          <v-card dark color="accent">
+        <v-flex xs6 sm4 v-for="(course,index) in courses" :key="index" @click="goToCourse(course)" style="cursor: pointer">
+          <v-card dark color="accent" >
             <v-card-media
               src="https://cdn-images-1.medium.com/max/825/1*CDlclChuNeeM5Shfev2RTg.jpeg"
               height="200px"
@@ -79,7 +83,7 @@
 <script>
   import InfiniteLoading from 'vue-infinite-loading';
   import _ from 'lodash';
-  import constants from '../constants';
+  import constants from '@/constants';
   import { mapGetters } from 'vuex';
 
   export default {
@@ -141,6 +145,10 @@
 
       categoryIdToText(categoryId) {
         return constants.courseCategories[categoryId]
+      },
+
+      goToCourse(course){
+        this.$router.push('/courses/' + course.id);
       }
 
     }

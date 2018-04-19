@@ -42,5 +42,43 @@ export const clearCourses = ({ commit }) => {
   commit('setCourses', []);
 }
 
+/**
+ * Sets the course selected by the user.
+ *
+ * @param commit
+ * @param course
+ */
+export const setSelectedCourse = ({ commit }, course) => {
+  commit('setSelectedCourse', course);
+}
+
+/**
+ * Gets the course that the user clicked on, from the backend API.
+ *
+ * @param commit
+ * @param courseId
+ */
+export const getSelectedCourse = ({ commit }, courseId) => {
+
+  // make api call to get the selected course
+  axios.get(`${config.apiUrl}/courses/` + courseId)
+    .then(response => {
+      commit('setSelectedCourse', response.data);
+    })
+    .catch(err => {
+      console.log(err);
+    })
+}
+
+/**
+ * Resets the selected course.
+ *
+ * @param commit
+ * @param courseId
+ */
+export const clearSelectedCourse = ({ commit }) => {
+  commit('setSelectedCourse', {})
+}
+
 
 
