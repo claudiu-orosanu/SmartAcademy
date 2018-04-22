@@ -43,7 +43,7 @@
     <v-container grid-list-xl>
       <v-layout row wrap>
         <v-flex xs6 sm4 v-for="(course,index) in courses" :key="index" @click="goToCourse(course)" style="cursor: pointer">
-          <v-card dark color="accent" >
+          <v-card dark color="accent">
             <v-card-media
               src="https://cdn-images-1.medium.com/max/825/1*CDlclChuNeeM5Shfev2RTg.jpeg"
               height="200px"
@@ -55,18 +55,6 @@
                 <span class="white--text">{{ categoryIdToText(course.category) }}</span>
               </div>
             </v-card-title>
-            <v-card-actions>
-              <v-btn color="secondary">Enroll</v-btn>
-              <v-spacer></v-spacer>
-              <v-btn icon @click.native="showDescription = !showDescription">
-                <v-icon>{{ showDescription ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</v-icon>
-              </v-btn>
-            </v-card-actions>
-            <v-slide-y-transition>
-              <v-card-text v-show="showDescription">
-                {{ course.description }}
-              </v-card-text>
-            </v-slide-y-transition>
           </v-card>
         </v-flex>
       </v-layout>
@@ -95,7 +83,6 @@
 
     data() {
       return {
-        showDescription: false,
         categories: constants.courseCategories,
         selectedCategories: [],
         searchTerm: ''

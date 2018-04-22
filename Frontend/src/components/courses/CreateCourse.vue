@@ -1,0 +1,290 @@
+<template>
+  <div>
+    <v-container>
+      <v-layout row>
+        <v-flex xs12 class="text-xs-center">
+          <div class="display-1">Create your course</div>
+        </v-flex>
+      </v-layout>
+
+      <v-layout row>
+        <v-flex xs12>
+          <form @submit.prevent="onCreateCourse">
+
+            <!--title-->
+            <v-layout row class="mt-3">
+              <v-flex xs12 sm10 offset-sm1>
+                <v-text-field
+                  name="title"
+                  label="Title"
+                  id="title"
+                  :rules="[(v) => v.length <= 25 || 'Max 25 characters']"
+                  :counter="25"
+                  v-model="title"
+                  required></v-text-field>
+              </v-flex>
+            </v-layout>
+
+            <!--category-->
+            <v-layout row class="mt-3">
+              <v-flex xs12 sm10 offset-sm1>
+                <v-select
+                  name="category"
+                  label="Category"
+                  :items="categories"
+                  required
+                  v-model="selectedCategory"
+                ></v-select>
+              </v-flex>
+            </v-layout>
+
+            <!--description-->
+            <v-layout row class="mt-3">
+              <v-flex xs12 sm10 offset-sm1>
+                <v-text-field
+                  name="description"
+                  label="Description"
+                  id="description"
+                  :rules="[(v) => v.length <= 50 || 'Max 50 characters']"
+                  :counter="50"
+                  v-model="description"
+                  multi-line clearable
+                  required></v-text-field>
+              </v-flex>
+            </v-layout>
+
+            <!--sections subtitle-->
+            <v-layout row class="mt-3">
+              <v-flex xs12 sm10 offset-sm1 offset-lg1>
+                <div class="headline">Sections</div>
+              </v-flex>
+            </v-layout>
+
+            <!--sections-->
+            <v-layout row class="mt-3">
+              <v-flex xs12 sm10 offset-sm1>
+                <v-card class="mb-3">
+                  <v-card-text>
+                    <v-text-field
+                      label="Number of sections"
+                      :value="sections"
+                      @input="onSectionsNumberChanged"
+                      min="1"
+                      :max="courseSectionsMax"
+                      hint="A course can have a maximum of 12 sections"
+                      type="number"
+                      persistent-hint
+                    ></v-text-field>
+                  </v-card-text>
+                </v-card>
+                <v-stepper v-model="currentSection" alt-labels>
+                  <v-stepper-header>
+                    <template v-for="n in sections">
+                      <v-stepper-step
+                        :key="`${n}-step`"
+                        :step="n"
+                        :complete="currentSection > n"
+                        editable
+                      >
+                        Section {{ n }}
+                      </v-stepper-step>
+                      <v-divider v-if="n !== sections" :key="n"></v-divider>
+                    </template>
+                  </v-stepper-header>
+                  <v-stepper-items>
+                    <v-stepper-content
+                      :step="n"
+                      v-for="n in sections"
+                      :key="`${n}-content`"
+                    >
+                      <v-container class="mb-1">
+                        <v-layout row wrap>
+                          <v-flex sm4 lg3>
+                            <v-btn style="width: 120px" @click="$refs.videoUploadInput[0].click()">Upload Video</v-btn>
+                          </v-flex>
+                          <v-flex>
+                            <input type="file" style="display: none" ref="videoUploadInput" @change="onVideoSelected">
+                            <v-text-field disabled v-model="sectionsVideo[n].name"></v-text-field>
+                          </v-flex>
+                        </v-layout>
+
+                        <v-layout row wrap>
+                          <v-flex sm4 lg3>
+                            <v-btn style="width: 120px" @click="$refs.pdfUploadInput[0].click()">Upload PDF</v-btn>
+                          </v-flex>
+                          <v-flex>
+                            <input type="file" style="display: none" ref="pdfUploadInput" @change="onPdfSelected">
+                            <v-text-field disabled v-model="sectionsPdf[n].name"></v-text-field>
+                          </v-flex>
+                        </v-layout>
+                      </v-container>
+                      <v-btn color="primary" :disabled="n === sections" @click="goToSection(n)">Next</v-btn>
+                      <v-btn flat :disabled="n === 1" @click="onBackButtonClicked">Back</v-btn>
+                    </v-stepper-content>
+                  </v-stepper-items>
+                </v-stepper>
+              </v-flex>
+            </v-layout>
+
+
+            <!--Create button-->
+            <v-layout row class="mt-4">
+              <v-flex class="text-xs-center">
+                <v-btn
+                  class="secondary"
+                  type="submit">Create course</v-btn>
+              </v-flex>
+            </v-layout>
+
+          </form>
+        </v-flex>
+      </v-layout>
+    </v-container>
+
+    <!--snackbar-->
+    <v-snackbar
+      :timeout="5000"
+      :top="snackbarTop === true"
+      :right="snackbarRight === true"
+      :color="snackbarColor"
+      v-model="snackbarShow"
+    >
+      {{ snackbarText }}
+      <v-btn flat dark @click.native="snackbarShow = false">
+        <v-icon>close</v-icon>
+      </v-btn>
+    </v-snackbar>
+  </div>
+</template>
+
+<script>
+  import constants from '@/constants';
+
+  export default {
+    name: 'CreateCourse',
+
+    data() {
+      return {
+        courseSectionsMax: 12,
+
+        currentSection: 1,
+        categories: constants.courseCategories,
+
+        title: '',
+        description: '',
+        selectedCategory: '',
+        sections: 1,
+        sectionsVideo: [],
+        sectionsPdf: [],
+
+
+        // snackbar variables
+        snackbarShow: false,
+        snackbarTop: false,
+        snackbarRight: false,
+        snackbarColor: '',
+        snackbarText: '',
+      }
+    },
+
+    computed: {
+
+    },
+
+    watch: {
+      sections (val) {
+        if (this.currentSection > val) {
+          this.sectionsPdf[this.currentSection] = '';
+          this.sectionsVideo[this.currentSection] = '';
+          this.currentSection = val
+        }
+      }
+    },
+
+    methods: {
+      onCreateCourse() {
+        let course = {
+          title: this.title,
+          description: this.description,
+          category: this.selectedCategory,
+          sectionsData: {}
+        };
+
+        for(let i = 1; i <= this.sections; i++) {
+          course.sectionsData[i] = {};
+          course.sectionsData[i].video = this.sectionsVideo[i];
+          course.sectionsData[i].pdf = this.sectionsPdf[i];
+
+          if(course.sectionsData[i].video === '' || course.sectionsData[i].pdf === '') {
+            return this.showSnackbar('All course sections need to have data uploaded!', 'error', true, false);
+          }
+        }
+
+        // TODO add the course test/homework
+
+        this.showSnackbar('Course created', 'success', true, true);
+      },
+      onVideoSelected(event) {
+        if(!event.target.files.length) {
+          return;
+        }
+
+        let validExtensions = ['mp4', 'webm', 'mkv', 'avi'];
+        let file = event.target.files[0];
+        let fileNameTokens = file.name.split('.');
+        if(fileNameTokens.length < 2 || validExtensions.indexOf(fileNameTokens[1]) == -1) {
+          return this.showSnackbar('Please choose a valid video file!', 'error', true, false);
+        }
+
+        this.$set(this.sectionsVideo, this.currentSection, event.target.files[0]);
+      },
+      onPdfSelected(event) {
+        if(!event.target.files.length) {
+          return;
+        }
+
+        let file = event.target.files[0];
+        let fileNameTokens = file.name.split('.');
+        if(fileNameTokens.length < 2 || fileNameTokens[1] !== 'pdf') {
+          return this.showSnackbar('Please choose a valid pdf file!', 'error', true, false);
+        }
+
+        this.$set(this.sectionsPdf, this.currentSection, event.target.files[0]);
+      },
+
+      onSectionsNumberChanged (val) {
+        this.sections = parseInt(val)
+      },
+      goToSection (n) {
+        if (n !== this.sections) {
+          this.currentSection = n + 1
+        }
+      },
+      onBackButtonClicked() {
+        if(this.currentSection > 1) {
+          this.currentSection -= 1;
+        }
+      },
+
+      showSnackbar(text, color, top, right) {
+        this.snackbarText = text;
+        this.snackbarColor = color;
+        this.snackbarTop = top;
+        this.snackbarRight = right;
+        this.snackbarShow = true;
+      }
+
+    },
+
+    created() {
+      for(let i = 1; i <= this.courseSectionsMax; i++) {
+        this.sectionsVideo[i] = '';
+        this.sectionsPdf[i] = '';
+      }
+    }
+  }
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+</style>

@@ -2,7 +2,7 @@
   <v-app>
 
     <!--left sidebar menu-->
-`    <v-navigation-drawer app v-model="sideNav" clipped>
+    <v-navigation-drawer app v-model="leftDrawer" clipped floating>
       <v-toolbar flat class="transparent">
         <v-list class="pa-0">
           <v-list-tile avatar>
@@ -31,8 +31,13 @@
             </v-list-tile-content>
           </v-list-tile>
           <router-link to="/courses" tag="v-list-tile">
-            <v-list-tile-content>
+            <v-list-tile-content class="ml-4">
               <v-list-tile-title>Explore</v-list-tile-title>
+            </v-list-tile-content>
+          </router-link>
+          <router-link to="/courses/create" tag="v-list-tile">
+            <v-list-tile-content class="ml-4">
+              <v-list-tile-title>Create</v-list-tile-title>
             </v-list-tile-content>
           </router-link>
         </v-list-group>
@@ -50,8 +55,8 @@
     </v-navigation-drawer>
 
     <!--top navigation menu-->
-    <v-toolbar app dark class="primary" clipped-left>
-      <v-toolbar-side-icon @click.stop="sideNav = !sideNav"></v-toolbar-side-icon>
+    <v-toolbar app dark class="primary" clipped-left clipped-right>
+      <v-toolbar-side-icon @click.stop="leftDrawer = !leftDrawer"></v-toolbar-side-icon>
       <router-link tag="v-toolbar-title" to="/" style="cursor: pointer">Smart Academy</router-link>
       <v-spacer></v-spacer>
       <v-toolbar-items>
@@ -81,7 +86,7 @@
 
     data () {
       return {
-        sideNav: true
+        leftDrawer: true,
       }
     },
 

@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import HelloWorld from '../components/HelloWorld'
 import Courses from '../components/courses/Courses'
 import Course from '../components/courses/Course'
+import CreateCourse from '../components/courses/CreateCourse'
 
 Vue.use(Router)
 
@@ -20,9 +21,15 @@ export default new Router({
       component: Courses
     },
     {
+      path: '/courses/create',
+      name: 'CreateCourse',
+      component: CreateCourse
+    },
+    {
       path: '/courses/:id',
       name: 'Course',
-      component: Course
+      component: Course,
+
     }
   ]
 });
