@@ -45,7 +45,7 @@
         <v-flex xs6 sm4 v-for="(course,index) in courses" :key="index" @click="goToCourse(course)" style="cursor: pointer">
           <v-card dark color="accent">
             <v-card-media
-              src="https://cdn-images-1.medium.com/max/825/1*CDlclChuNeeM5Shfev2RTg.jpeg"
+              :src="backendUrl + course.image_url"
               height="200px"
             >
             </v-card-media>
@@ -72,6 +72,7 @@
   import InfiniteLoading from 'vue-infinite-loading';
   import _ from 'lodash';
   import constants from '@/constants';
+  import config from '@/config';
   import { mapGetters } from 'vuex';
 
   export default {
@@ -85,7 +86,8 @@
       return {
         categories: constants.courseCategories,
         selectedCategories: [],
-        searchTerm: ''
+        searchTerm: '',
+        backendUrl: config.backendUrl,
       }
     },
 
@@ -95,6 +97,10 @@
       ])
     },
 
+    created() {
+      this.refreshCourses();
+    },
+
     methods: {
       infiniteHandler($state) {
 
@@ -102,7 +108,7 @@
         let courses = this.$store.getters.courses;
 
         let itemsPerPage = 9;
-        let page = courses.length / itemsPerPage + 1;
+        let page = Math.round(courses.length / itemsPerPage + 1);
 
         let payload = {
           infHandlerState: $state,
@@ -116,18 +122,12 @@
         this.$store.dispatch('getPaginatedCourses', payload);
       },
 
-      searchTermChanged: _.debounce(function () {
-        this.$store.dispatch('clearCourses');
-        this.$nextTick(() => {
-          this.$refs.infiniteLoading.$emit('$InfiniteLoading:reset');
-        });
+      searchTermChanged: _.debounce(function() {
+        this.refreshCourses();
       }, 450),
 
       categoryFilterChanged() {
-        this.$store.dispatch('clearCourses');
-        this.$nextTick(() => {
-          this.$refs.infiniteLoading.$emit('$InfiniteLoading:reset');
-        });
+        this.refreshCourses();
       },
 
       categoryIdToText(categoryId) {
@@ -136,7 +136,14 @@
 
       goToCourse(course){
         this.$router.push('/courses/' + course.id);
-      }
+      },
+
+      refreshCourses: function() {
+        this.$store.dispatch('clearCourses');
+        this.$nextTick(() => {
+          this.$refs.infiniteLoading.$emit('$InfiniteLoading:reset');
+        });
+      },
 
     }
   }

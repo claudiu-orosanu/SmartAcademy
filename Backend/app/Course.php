@@ -24,6 +24,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Course wherePrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Course whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string $imageUrl
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Section[] $sections
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Course whereImageUrl($value)
  */
 class Course extends Model
 {
@@ -38,8 +41,12 @@ class Course extends Model
         'description',
         'category',
         'price',
-        'image',
+        'image_url',
 //        'teacher_id',
     ];
 
+    // relationships
+    public function sections() {
+        return $this->hasMany('App\Section');
+    }
 }

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import config from '../config';
+import constants from '../constants';
 
 /**
  * Call api backend and get courses.
@@ -17,7 +18,7 @@ export const getPaginatedCourses = ({ commit, state }, payload) => {
       itemsPerPage: payload.itemsPerPage,
       search: payload.searchTerm,
       categories: payload.categories
-    },
+    }
   })
     .then(response => {
       let courses = response.data.data;
@@ -74,10 +75,44 @@ export const getSelectedCourse = ({ commit }, courseId) => {
  * Resets the selected course.
  *
  * @param commit
- * @param courseId
  */
 export const clearSelectedCourse = ({ commit }) => {
   commit('setSelectedCourse', {})
+}
+
+/**
+ * Creates a course.
+ *
+ * @param commit
+ * @param course
+ */
+export const createCourse = ({ commit }, course) => {
+
+  return new Promise((resolve, reject) => {
+
+    const fd = new FormData();
+    fd.append('name', course.name);
+    fd.append('description', course.description);
+    fd.append('category', constants.courseCategoriesMapping[course.category]);
+    fd.append('price', course.price);
+    fd.append('image', course.image);
+
+    for(let i in course.sectionsData){
+      fd.append('videos[]', course.sectionsData[i].video);
+      fd.append('documents[]', course.sectionsData[i].pdf);
+    }
+
+    axios.post(`${config.apiUrl}/courses`, fd)
+      .then((response) => {
+        resolve(response);
+      })
+      .catch(err => {
+        let errors = _.flatten(Object.values(err.response.data.errors));
+        reject(errors);
+      });
+  });
+
+
 }
 
 

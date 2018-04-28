@@ -3,12 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Course;
+use App\Document;
 use App\Http\Resources\CourseCollection;
 use App\Http\Resources\CourseResource;
+use App\Section;
+use App\Video;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
+
+    private $validVideoExtensions = ['mp4', 'mpeg'];
+    private $validDocumentExtensions = ['pdf'];
+
     /**
      * Display a listing of the resource.
      *
@@ -52,7 +61,72 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // is user authenticated?
+
+        // is user teacher?
+
+        // validate request
+        $maxSize = (int)ini_get('upload_max_filesize') * 1000;
+
+        $this->validate($request, [
+            'name' => 'required|min:3|max:50',
+            'description' => 'required|min:3|max:255',
+            'category' => 'required',
+            'price' => 'required',
+            'image' => 'required|file|image|max:' . $maxSize
+        ]);
+
+        // store course image in public folder
+        $imageFile = $request->file('image');
+        $imagePath = Storage::disk('public')->putFile('courseImages', $imageFile);
+        $imageUrl = Storage::url($imagePath);
+
+        // create course
+        $course = Course::create([
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'price' => $request->input('price'),
+            'category' => $request->input('category'),
+            'image_url' => $imageUrl,
+        ]);
+
+        // create sections for this course
+        $numberOfSections = count($request->file('videos'));
+        for($i = 0; $i < $numberOfSections; $i++) {
+
+            // create section
+            $section = Section::create([
+                'order_number' => $i + 1,
+                'name' => 'tbd',
+                'course_id' => $course->id,
+            ]);
+
+            // store video for section
+            $videoFile = $request->file('videos')[$i];
+            $videoPath = Storage::putFile('videos', $videoFile);
+            $videoUrl = Storage::url($videoPath);
+
+            // create video for section
+            Video::create([
+                'name' => 'video',
+                'url' => $videoUrl,
+                'section_id' => $section->id,
+            ]);
+
+            // store document for section
+            $docFile = $request->file('documents')[$i];
+            $docPath = Storage::putFileAs('documents/' . $course->id, $docFile, $docFile->getClientOriginalName());
+            $docUrl = Storage::url($docPath);
+
+            // create document for section
+            Document::create([
+                'name' => 'document',
+                'url' => $docUrl,
+                'section_id' => $section->id,
+            ]);
+        }
+
+        return response($course);
     }
 
     /**
