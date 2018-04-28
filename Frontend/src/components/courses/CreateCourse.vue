@@ -352,6 +352,9 @@
     },
 
     created() {
+      // scroll to top
+      window.scrollTo(0, 0);
+
       for(let i = 1; i <= this.courseSectionsMax; i++) {
         this.sectionsVideo[i] = '';
         this.sectionsPdf[i] = '';

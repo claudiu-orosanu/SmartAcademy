@@ -87,6 +87,7 @@
         categories: constants.courseCategories,
         selectedCategories: [],
         searchTerm: '',
+        searchOrFilterInProgress: false,
         backendUrl: config.backendUrl,
       }
     },
@@ -108,25 +109,30 @@
         let courses = this.$store.getters.courses;
 
         let itemsPerPage = 9;
-        let page = Math.round(courses.length / itemsPerPage + 1);
+        let page = Math.ceil(courses.length / itemsPerPage + 1);
 
         let payload = {
           infHandlerState: $state,
           itemsPerPage,
           page,
           searchTerm: this.searchTerm,
-          categories: this.selectedCategories.map(c => constants.courseCategoriesMapping[c])
+          categories: this.selectedCategories.map(c => constants.courseCategoriesMapping[c]),
+          searchOrFilterInProgress: this.searchOrFilterInProgress
         }
 
         //get courses from backend API
-        this.$store.dispatch('getPaginatedCourses', payload);
+        this.$store.dispatch('getPaginatedCourses', payload)
+          .then(() => this.searchOrFilterInProgress = false)
+          .catch(err => console.log(err));
       },
 
       searchTermChanged: _.debounce(function() {
+        this.searchOrFilterInProgress = true;
         this.refreshCourses();
       }, 450),
 
       categoryFilterChanged() {
+        this.searchOrFilterInProgress = true;
         this.refreshCourses();
       },
 

@@ -11,27 +11,39 @@ import constants from '../constants';
  */
 export const getPaginatedCourses = ({ commit, state }, payload) => {
 
-  // make api call to get the paginated courses
-  axios.get(`${config.apiUrl}/courses`, {
-    params: {
-      page: payload.page,
-      itemsPerPage: payload.itemsPerPage,
-      search: payload.searchTerm,
-      categories: payload.categories
-    }
-  })
-    .then(response => {
-      let courses = response.data.data;
-      if (courses.length) {
-        commit('addCourses', courses);
-        payload.infHandlerState.loaded();
-      } else {
-        payload.infHandlerState.complete();
+  return new Promise((resolve, reject) => {
+
+    // make api call to get the paginated courses
+    axios.get(`${config.apiUrl}/courses`, {
+      params: {
+        page: payload.page,
+        itemsPerPage: payload.itemsPerPage,
+        search: payload.searchTerm,
+        categories: payload.categories
       }
     })
-    .catch(err => {
-      console.log(err);
-    })
+      .then(response => {
+        let courses = response.data.data;
+        if (courses.length) {
+
+          if(payload.searchOrFilterInProgress){
+            commit('setCourses', []);
+          }
+
+          commit('addCourses', courses);
+          payload.infHandlerState.loaded();
+        } else {
+          payload.infHandlerState.complete();
+        }
+
+        resolve();
+      })
+      .catch(err => {
+        reject(err);
+      })
+  });
+
+
 }
 
 /**
