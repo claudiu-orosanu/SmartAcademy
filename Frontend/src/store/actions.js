@@ -73,14 +73,19 @@ export const setSelectedCourse = ({ commit }, course) => {
  */
 export const getSelectedCourse = ({ commit }, courseId) => {
 
-  // make api call to get the selected course
-  axios.get(`${config.apiUrl}/courses/` + courseId)
-    .then(response => {
-      commit('setSelectedCourse', response.data);
-    })
-    .catch(err => {
-      console.log(err);
-    })
+  return new Promise((resolve, reject) => {
+
+    // make api call to get the selected course
+    axios.get(`${config.apiUrl}/courses/` + courseId)
+      .then(response => {
+        commit('setSelectedCourse', response.data);
+        resolve();
+      })
+      .catch(err => {
+        reject(err);
+      })
+
+  });
 }
 
 /**

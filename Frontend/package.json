@@ -15,6 +15,7 @@
     "vue": "^2.5.16",
     "vue-infinite-loading": "^2.3.1",
     "vue-router": "^3.0.1",
+    "vue-video-player": "^5.0.2",
     "vuetify": "^1.0.8",
     "vuex": "^3.0.1"
   },

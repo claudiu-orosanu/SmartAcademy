@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Video;
 use Illuminate\Http\Request;
+use Storage;
 
 class VideoController extends Controller
 {
@@ -32,12 +33,12 @@ class VideoController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Video $video
+     * @return Video
      */
-    public function show($id)
+    public function show(Video $video)
     {
-        //
+        return $video;
     }
 
     /**

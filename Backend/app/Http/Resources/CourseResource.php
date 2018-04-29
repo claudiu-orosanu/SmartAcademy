@@ -19,6 +19,8 @@ class CourseResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'category' => $this->category,
+            'image_url' => $this->image_url,
+            'sections' => SectionResource::collection($this->sections),
         ];
 
         /*return [

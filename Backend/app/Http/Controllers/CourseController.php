@@ -103,24 +103,24 @@ class CourseController extends Controller
 
             // store video for section
             $videoFile = $request->file('videos')[$i];
-            $videoPath = Storage::putFile('videos', $videoFile);
+            $videoPath = Storage::disk('public')->putFile('videos', $videoFile);
             $videoUrl = Storage::url($videoPath);
 
             // create video for section
             Video::create([
-                'name' => 'video',
+                'name' => $videoFile->getClientOriginalName(),
                 'url' => $videoUrl,
                 'section_id' => $section->id,
             ]);
 
             // store document for section
             $docFile = $request->file('documents')[$i];
-            $docPath = Storage::putFileAs('documents/' . $course->id, $docFile, $docFile->getClientOriginalName());
+            $docPath = Storage::disk('public')->putFileAs('documents/' . $course->id, $docFile, $docFile->getClientOriginalName());
             $docUrl = Storage::url($docPath);
 
             // create document for section
             Document::create([
-                'name' => 'document',
+                'name' => $docFile->getClientOriginalName(),
                 'url' => $docUrl,
                 'section_id' => $section->id,
             ]);

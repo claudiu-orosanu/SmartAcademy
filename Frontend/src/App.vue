@@ -92,3 +92,12 @@
 
   }
 </script>
+
+<style>
+  .vjs-custom-skin > .video-js .vjs-big-play-button {
+    top: 50%;
+    left: 50%;
+    margin-left: -1.5em;
+    margin-top: -1em
+  }
+</style>
