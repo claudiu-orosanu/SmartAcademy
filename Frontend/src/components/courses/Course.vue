@@ -75,7 +75,7 @@
 
 <script>
   import {mapGetters} from 'vuex';
-  import config from '@/config';
+  import {backendUrl} from '@/config';
 
   import 'video.js/dist/video-js.css';
   import {videoPlayer} from 'vue-video-player';
@@ -89,7 +89,7 @@
 
     data() {
       return {
-        backendUrl: config.backendUrl,
+        backendUrl: backendUrl,
         documentUrl: null,
         activeSection: 0,
 

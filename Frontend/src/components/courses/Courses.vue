@@ -59,9 +59,7 @@
         </v-flex>
       </v-layout>
       <infinite-loading @infinite="infiniteHandler" ref="infiniteLoading" spinner="spiral">
-        <span slot='no-more'>
-          No more courses :(
-        </span>
+        <span slot='no-more'></span>
       </infinite-loading>
     </v-container>
 
@@ -72,7 +70,7 @@
   import InfiniteLoading from 'vue-infinite-loading';
   import _ from 'lodash';
   import constants from '@/constants';
-  import config from '@/config';
+  import {backendUrl} from '@/config';
   import { mapGetters } from 'vuex';
 
   export default {
@@ -88,7 +86,7 @@
         selectedCategories: [],
         searchTerm: '',
         searchOrFilterInProgress: false,
-        backendUrl: config.backendUrl,
+        backendUrl: backendUrl,
       }
     },
 

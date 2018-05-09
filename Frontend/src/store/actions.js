@@ -1,5 +1,5 @@
 import axios from 'axios';
-import config from '../config';
+import {apiUrl, backendUrl} from '../config';
 import constants from '../constants';
 
 /**
@@ -9,12 +9,12 @@ import constants from '../constants';
  * @param state
  * @param payload
  */
-export const getPaginatedCourses = ({ commit, state }, payload) => {
+export const getPaginatedCourses = ({commit, state}, payload) => {
 
   return new Promise((resolve, reject) => {
 
     // make api call to get the paginated courses
-    axios.get(`${config.apiUrl}/courses`, {
+    axios.get(`${apiUrl}/courses`, {
       params: {
         page: payload.page,
         itemsPerPage: payload.itemsPerPage,
@@ -26,7 +26,7 @@ export const getPaginatedCourses = ({ commit, state }, payload) => {
         let courses = response.data.data;
         if (courses.length) {
 
-          if(payload.searchOrFilterInProgress){
+          if (payload.searchOrFilterInProgress) {
             commit('setCourses', []);
           }
 
@@ -51,7 +51,7 @@ export const getPaginatedCourses = ({ commit, state }, payload) => {
  *
  * @param commit
  */
-export const clearCourses = ({ commit }) => {
+export const clearCourses = ({commit}) => {
   commit('setCourses', []);
 }
 
@@ -61,7 +61,7 @@ export const clearCourses = ({ commit }) => {
  * @param commit
  * @param course
  */
-export const setSelectedCourse = ({ commit }, course) => {
+export const setSelectedCourse = ({commit}, course) => {
   commit('setSelectedCourse', course);
 }
 
@@ -71,12 +71,12 @@ export const setSelectedCourse = ({ commit }, course) => {
  * @param commit
  * @param courseId
  */
-export const getSelectedCourse = ({ commit }, courseId) => {
+export const getSelectedCourse = ({commit}, courseId) => {
 
   return new Promise((resolve, reject) => {
 
     // make api call to get the selected course
-    axios.get(`${config.apiUrl}/courses/` + courseId)
+    axios.get(`${apiUrl}/courses/` + courseId)
       .then(response => {
         commit('setSelectedCourse', response.data);
         resolve();
@@ -93,7 +93,7 @@ export const getSelectedCourse = ({ commit }, courseId) => {
  *
  * @param commit
  */
-export const clearSelectedCourse = ({ commit }) => {
+export const clearSelectedCourse = ({commit}) => {
   commit('setSelectedCourse', {})
 }
 
@@ -103,7 +103,7 @@ export const clearSelectedCourse = ({ commit }) => {
  * @param commit
  * @param course
  */
-export const createCourse = ({ commit }, course) => {
+export const createCourse = ({commit}, course) => {
 
   return new Promise((resolve, reject) => {
 
@@ -114,12 +114,12 @@ export const createCourse = ({ commit }, course) => {
     fd.append('price', course.price);
     fd.append('image', course.image);
 
-    for(let i in course.sectionsData){
+    for (let i in course.sectionsData) {
       fd.append('videos[]', course.sectionsData[i].video);
       fd.append('documents[]', course.sectionsData[i].pdf);
     }
 
-    axios.post(`${config.apiUrl}/courses`, fd)
+    axios.post(`${apiUrl}/courses`, fd)
       .then((response) => {
         resolve(response);
       })
@@ -128,8 +128,92 @@ export const createCourse = ({ commit }, course) => {
         reject(errors);
       });
   });
+}
 
 
+/**
+ * Authentication actions
+ */
+export const login = ({commit}, credentials) => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${apiUrl}/auth/login`, credentials)
+      .then(response => {
+
+        let user = Object.assign({}, response.data.user, {
+          token: response.data.access_token
+        });
+
+        commit('setCurrentUser', user);
+        resolve();
+      })
+      .catch(err => {
+        let errors;
+        if (err.response.status == 401)
+          errors = ['Wrong credentials! Please make sure you typed correctly!'];
+        else {
+          errors = _.flatten(Object.values(err.response.data.errors));
+        }
+        reject(errors);
+      });
+  });
+}
+
+export const register = ({commit}, credentials) => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${apiUrl}/auth/register`, credentials)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(err => {
+        let errors = _.flatten(Object.values(err.response.data.errors));
+        reject(errors);
+      });
+  });
+}
+
+export const logout = ({commit, state}) => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${apiUrl}/auth/logout`,{}, {
+      headers: {
+        Authorization: `Bearer ${state.currentUser.token}`
+      }
+    })
+      .then(response => {
+        commit('setCurrentUser', null);
+        resolve(response);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}
+
+export const recoverPassword = ({commit}, credentials) => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${apiUrl}/auth/resetPassword`, credentials)
+      .then(response => {
+        resolve(response);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}
+
+export const resetPassword = ({commit}, credentials) => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${backendUrl}/password/reset`, credentials, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
 }
 
 

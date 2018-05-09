@@ -178,20 +178,6 @@
         </v-flex>
       </v-layout>
     </v-container>
-
-    <!--snackbar-->
-    <v-snackbar
-      :timeout="5000"
-      :top="snackbarTop === true"
-      :right="snackbarRight === true"
-      :color="snackbarColor"
-      v-model="snackbarShow"
-    >
-      {{ snackbarText }}
-      <v-btn flat dark @click.native="snackbarShow = false">
-        <v-icon>close</v-icon>
-      </v-btn>
-    </v-snackbar>
   </div>
 </template>
 
@@ -219,13 +205,6 @@
         sectionsPdf: [],
 
         errors: [],
-
-        // snackbar variables
-        snackbarShow: false,
-        snackbarTop: false,
-        snackbarRight: false,
-        snackbarColor: '',
-        snackbarText: '',
       }
     },
 
@@ -260,7 +239,8 @@
           course.sectionsData[i].pdf = this.sectionsPdf[i];
 
           if(course.sectionsData[i].video === '' || course.sectionsData[i].pdf === '') {
-            return this.showSnackbar('All course sections need to have data uploaded!', 'error', true, false);
+            this.showSnackbar('All course sections need to have data uploaded!', 'error', true, false);
+            return;
           }
         }
 
@@ -268,14 +248,12 @@
 
         this.$store.dispatch('createCourse', course)
           .then(response => {
-            console.log(response);
+            this.showSnackbar('Course created', 'success', true, true);
             this.errors = [];
           })
           .catch(err => {
             this.errors = err;
           });
-
-        this.showSnackbar('Course created', 'success', true, true);
       },
       onImageSelected(event) {
         if(!event.target.files.length) {
@@ -286,7 +264,8 @@
         let file = event.target.files[0];
         let fileNameTokens = file.name.split('.');
         if(fileNameTokens.length < 2 || validExtensions.indexOf(fileNameTokens[1]) == -1) {
-          return this.showSnackbar('Please choose a valid image file!', 'error', true, false);
+          this.showSnackbar('Please choose a valid image file!', 'error', true, false);
+          return;
         }
 
         this.image = event.target.files[0];
@@ -308,7 +287,8 @@
         let file = event.target.files[0];
         let fileNameTokens = file.name.split('.');
         if(fileNameTokens.length < 2 || validExtensions.indexOf(fileNameTokens[1]) == -1) {
-          return this.showSnackbar('Please choose a valid video file!', 'error', true, false);
+          this.showSnackbar('Please choose a valid video file!', 'error', true, false);
+          return;
         }
 
         this.$set(this.sectionsVideo, this.currentSection, event.target.files[0]);
@@ -321,7 +301,8 @@
         let file = event.target.files[0];
         let fileNameTokens = file.name.split('.');
         if(fileNameTokens.length < 2 || fileNameTokens[1] !== 'pdf') {
-          return this.showSnackbar('Please choose a valid pdf file!', 'error', true, false);
+          this.showSnackbar('Please choose a valid pdf file!', 'error', true, false);
+          return;
         }
 
         this.$set(this.sectionsPdf, this.currentSection, event.target.files[0]);
@@ -342,11 +323,15 @@
       },
 
       showSnackbar(text, color, top, right) {
-        this.snackbarText = text;
-        this.snackbarColor = color;
-        this.snackbarTop = top;
-        this.snackbarRight = right;
-        this.snackbarShow = true;
+        let settings = {
+          timeout: 5000,
+          text: text,
+          color: color,
+          top: top,
+          right: right,
+          show: true
+        }
+        this.$store.commit('showSnackbar', settings)
       }
 
     },
@@ -365,8 +350,4 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .error-box {
-    border: #ff0900 3px solid;
-    background-color: #ffd6cb;
-  }
 </style>

@@ -10,3 +10,12 @@ export const setSelectedCourse = (state, course) => {
   state.selectedCourse = course;
 }
 
+export const setCurrentUser = (state, user) => {
+  state.currentUser = user;
+  localStorage.setItem('user', JSON.stringify(user));
+}
+
+export const showSnackbar = (state, settings) => {
+  state.snackBar = settings;
+}
+

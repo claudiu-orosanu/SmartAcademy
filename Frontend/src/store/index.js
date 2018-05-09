@@ -8,7 +8,9 @@ Vue.use(Vuex)
 
 const state = {
   courses: [],
-  selectedCourse: {}
+  selectedCourse: {},
+  currentUser: getUser(),
+  snackBar: {}
 }
 
 const store = new Vuex.Store({
@@ -30,6 +32,14 @@ if (module.hot) {
       mutations: require('./mutations')
     })
   })
+}
+
+function getUser() {
+  let user = localStorage.getItem('user');
+  if(!user) {
+    return null;
+  }
+  return JSON.parse(user);
 }
 
 export default store

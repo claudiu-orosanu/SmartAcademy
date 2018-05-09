@@ -35,7 +35,7 @@
               <v-list-tile-title>Explore</v-list-tile-title>
             </v-list-tile-content>
           </router-link>
-          <router-link to="/courses/create" tag="v-list-tile">
+          <router-link v-if="isAuthenticated" to="/courses/create" tag="v-list-tile">
             <v-list-tile-content class="ml-4">
               <v-list-tile-title>Create</v-list-tile-title>
             </v-list-tile-content>
@@ -60,10 +60,35 @@
       <router-link tag="v-toolbar-title" to="/" style="cursor: pointer">Smart Academy</router-link>
       <v-spacer></v-spacer>
       <v-toolbar-items>
-        <v-btn flat dark>
-          <v-icon left>account_circle</v-icon>
-          Claudiu
-        </v-btn>
+        <template v-if="isAuthenticated">
+          <v-menu offset-y left>
+            <v-btn flat dark slot="activator">
+              <v-icon left>account_circle</v-icon>
+              {{currentUser.name}}
+            </v-btn>
+            <v-list>
+              <v-list-tile>
+                <v-list-tile-action><v-icon>account_circle</v-icon></v-list-tile-action>
+                <v-list-tile-title>My Profile</v-list-tile-title>
+              </v-list-tile>
+              <v-list-tile @click="logout">
+                <v-list-tile-action><v-icon>fa fa-sign-out-alt</v-icon></v-list-tile-action>
+                <v-list-tile-title>Logout</v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
+
+        </template>
+        <template v-else>
+          <v-btn to="/login" flat dark>
+            <v-icon left>fa fa-sign-in-alt</v-icon>
+            Log In
+          </v-btn>
+          <v-btn to="/register" flat dark>
+            <v-icon left>account_circle</v-icon>
+            Register
+          </v-btn>
+        </template>
       </v-toolbar-items>
     </v-toolbar>
 
@@ -71,6 +96,20 @@
     <v-content>
       <router-view/>
     </v-content>
+
+    <!--snackbar(notification bar)-->
+    <v-snackbar
+      :timeout="snackBar.timeout"
+      :top="snackBar.top === true"
+      :right="snackBar.right === true"
+      :color="snackBar.color"
+      v-model="snackBar.show"
+    >
+      {{ snackBar.text }}
+      <v-btn flat dark @click.native="snackBar.show = false">
+        <v-icon>close</v-icon>
+      </v-btn>
+    </v-snackbar>
 
     <!--footer-->
     <v-footer app fixed>
@@ -81,14 +120,34 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
+
   export default {
     name: 'App',
 
     data () {
       return {
-        leftDrawer: true,
+        leftDrawer: true
       }
     },
+
+    computed: {
+      ...mapGetters([
+        'currentUser',
+        'isAuthenticated',
+        'snackBar'
+      ])
+    },
+
+    methods: {
+      logout() {
+        this.$store.dispatch('logout')
+          .then(response => {
+            this.$router.push('/');
+          })
+          .catch(err => console.log(err));
+      }
+    }
 
   }
 </script>
@@ -99,5 +158,10 @@
     left: 50%;
     margin-left: -1.5em;
     margin-top: -1em
+  }
+
+  .error-box {
+    border: #ff0900 2px solid;
+    background-color: #ffc1bc;
   }
 </style>

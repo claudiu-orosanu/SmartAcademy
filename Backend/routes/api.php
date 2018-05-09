@@ -17,15 +17,29 @@ use Illuminate\Support\Facades\Storage;
 
 Route::prefix('v1')->group(function () {
 
-    Route::middleware('auth:api')->get('/user', function (Request $request) {
-        return $request->user();
+
+    Route::prefix('auth')->group(function () {
+        Route::post('/me', 'AuthController@me');
+        Route::post('/logout', 'AuthController@logout');
+        Route::post('/login', 'AuthController@login');
+        Route::post('/register', 'AuthController@register');
+        Route::post('/resetPassword', 'AuthController@resetPassword');
+        Route::post('/resetPasswordCallback', 'Auth\ResetPasswordController@reset');
     });
 
     Route::apiResource('courses', 'CourseController');
     Route::apiResource('sections', 'SectionController');
     Route::apiResource('videos', 'VideoController');
     Route::apiResource('documents', 'DocumentController');
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
     Route::get('/test', function (Request $request) {
         return response(json_encode([1, 2, 3, 4]), 200);
     });
