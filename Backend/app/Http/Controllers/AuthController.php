@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Notifications\UserRegistered;
+use App\Role;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
@@ -53,6 +55,9 @@ class AuthController extends Controller
             'password' => bcrypt($password),
             'verify_token' => $verification_code,
         ]);
+
+        // assign 'student' role to new user
+        $user->attachRole(Role::whereName('student')->first());
 
         // send verification mail
         $user->notify(new UserRegistered($user));
@@ -141,7 +146,7 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth()->user()
+            'user' => new UserResource(auth()->user()),
         ]);
     }
 

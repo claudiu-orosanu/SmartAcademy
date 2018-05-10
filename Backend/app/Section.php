@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Section whereOrderNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Section whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Video[] $videos
  */
 class Section extends Model
 {

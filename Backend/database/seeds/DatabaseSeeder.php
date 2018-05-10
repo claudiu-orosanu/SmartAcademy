@@ -1,5 +1,7 @@
 <?php
 
+use App\Role;
+use App\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -11,8 +13,46 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UsersTableSeeder::class);
+        $this->createRolesAndAdmin();
+//        $this->createCourses();
 
+    }
+
+    private function createRolesAndAdmin()
+    {
+        // create admin role
+        $adminRole = new Role([
+            'name' => 'admin'
+        ]);
+        $adminRole->save();
+
+        // create teacher role
+        $teacherRole = new Role([
+            'name' => 'teacher'
+        ]);
+        $teacherRole->save();
+
+        // create student role
+        $studentRole = new Role([
+            'name' => 'student'
+        ]);
+        $studentRole->save();
+
+        // create admin user
+        $adminUser = new User([
+            'first_name' => 'Admin',
+            'last_name' => 'Global',
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('admin'),
+            'is_verified' => true,
+            'remember_token' => str_random(10)
+        ]);
+        $adminUser->save();
+        $adminUser->attachRole($adminRole);
+    }
+
+    private function createCourses()
+    {
         // create the courses
         factory(\App\Course::class, 5)->create();
         $courseIds = \App\Course::all()->pluck('id')->toArray();

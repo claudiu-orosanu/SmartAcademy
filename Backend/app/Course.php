@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $imageUrl
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Section[] $sections
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Course whereImageUrl($value)
+ * @property string|null $image_url
  */
 class Course extends Model
 {
