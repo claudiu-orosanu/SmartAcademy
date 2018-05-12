@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Video[] $videos
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Exam[] $exams
  */
 class Section extends Model
 {
@@ -43,5 +44,9 @@ class Section extends Model
 
     public function documents() {
         return $this->hasMany('App\Document');
+    }
+
+    public function exams() {
+        return $this->hasMany('App\Exam');
     }
 }

@@ -63,7 +63,7 @@
                   :rules="[(v) => v.length <= 255 || 'Max 255 characters']"
                   :counter="255"
                   v-model="description"
-                  multi-line clearable
+                  textarea clearable
                   required
                 ></v-text-field>
               </v-flex>
@@ -123,6 +123,18 @@
                       :key="`${n}-content`"
                     >
                       <v-container class="mb-1">
+
+                        <!--section name-->
+                        <v-layout row wrap>
+                          <v-flex xs12 class="pl-2">
+                            <v-text-field
+                              label="Section name"
+                              v-model="sectionsNames[n]"
+                            ></v-text-field>
+                          </v-flex>
+                        </v-layout>
+
+                        <!--section video-->
                         <v-layout row wrap>
                           <v-flex sm4 lg3>
                             <v-btn style="width: 120px" @click="$refs.videoUploadInput[0].click()">Upload Video</v-btn>
@@ -133,6 +145,7 @@
                           </v-flex>
                         </v-layout>
 
+                        <!--section document-->
                         <v-layout row wrap>
                           <v-flex sm4 lg3>
                             <v-btn style="width: 120px" @click="$refs.pdfUploadInput[0].click()">Upload PDF</v-btn>
@@ -142,7 +155,16 @@
                             <v-text-field disabled v-model="sectionsPdf[n].name"></v-text-field>
                           </v-flex>
                         </v-layout>
+
+                        <!--section test-->
+                        <v-layout row wrap>
+                          <v-flex>
+                            <v-btn @click="showCreateTestWindow = true">Create section test</v-btn>
+                            <v-icon v-show="sectionsTests[currentSection]" color="success">done</v-icon>
+                          </v-flex>
+                        </v-layout>
                       </v-container>
+
                       <v-btn color="primary" :disabled="n === sections" @click="goToSection(n)">Next</v-btn>
                       <v-btn flat :disabled="n === 1" @click="onBackButtonClicked">Back</v-btn>
                     </v-stepper-content>
@@ -174,6 +196,14 @@
               </v-flex>
             </v-layout>
 
+            <!--Create section test window-->
+            <create-test-window
+              :section="currentSection"
+              v-model="showCreateTestWindow"
+              @testCreated="onSectionTestCreated"
+              @close="showCreateTestWindow = false"
+            ></create-test-window>
+
           </form>
         </v-flex>
       </v-layout>
@@ -183,9 +213,14 @@
 
 <script>
   import constants from '@/constants';
+  import createTestWindow from './CreateTestWindow'
 
   export default {
     name: 'CreateCourse',
+
+    components: {
+      'create-test-window': createTestWindow
+    },
 
     data() {
       return {
@@ -200,9 +235,14 @@
         price: '',
         image: '',
         imagePreview: '',
+
         sections: 1,
+        sectionsNames: [],
         sectionsVideo: [],
         sectionsPdf: [],
+        sectionsTests: [],
+
+        showCreateTestWindow: false,
 
         errors: [],
       }
@@ -215,14 +255,21 @@
     watch: {
       sections (val) {
         if (this.currentSection > val) {
+          this.sectionsNames[this.currentSection] = '';
           this.sectionsPdf[this.currentSection] = '';
           this.sectionsVideo[this.currentSection] = '';
-          this.currentSection = val
+          this.sectionsTests[this.currentSection] = '';
+          this.currentSection = val;
         }
       }
     },
 
     methods: {
+
+      /**
+       * Called when user clicks Create Course button
+       *
+       */
       onCreateCourse() {
         let course = {
           name: this.name,
@@ -235,16 +282,16 @@
 
         for(let i = 1; i <= this.sections; i++) {
           course.sectionsData[i] = {};
+          course.sectionsData[i].name = this.sectionsNames[i];
           course.sectionsData[i].video = this.sectionsVideo[i];
           course.sectionsData[i].pdf = this.sectionsPdf[i];
+          course.sectionsData[i].exam = this.sectionsTests[i];
 
-          if(course.sectionsData[i].video === '' || course.sectionsData[i].pdf === '') {
-            this.showSnackbar('All course sections need to have data uploaded!', 'error', true, false);
+          if(course.sectionsData[i].video === '' || course.sectionsData[i].pdf === '' || course.sectionsData[i].exam === '') {
+            this.showSnackbar('All course sections must be completed!', 'error', true, false);
             return;
           }
         }
-
-        // TODO add the course exam
 
         this.$store.dispatch('createCourse', course)
           .then(response => {
@@ -255,6 +302,12 @@
             this.errors = err;
           });
       },
+
+      /**
+       * Called when user has selected an image for upload
+       *
+       * @param event
+       */
       onImageSelected(event) {
         if(!event.target.files.length) {
           return;
@@ -278,6 +331,12 @@
         reader.readAsDataURL(this.image);
 
       },
+
+      /**
+       * Called when user has selected a video for upload
+       *
+       * @param event
+       */
       onVideoSelected(event) {
         if(!event.target.files.length) {
           return;
@@ -293,6 +352,12 @@
 
         this.$set(this.sectionsVideo, this.currentSection, event.target.files[0]);
       },
+
+      /**
+       * Called when user has selected a pdf for upload
+       *
+       * @param event
+       */
       onPdfSelected(event) {
         if(!event.target.files.length) {
           return;
@@ -308,6 +373,21 @@
         this.$set(this.sectionsPdf, this.currentSection, event.target.files[0]);
       },
 
+      /**
+       * Called when user creates a section test
+       *
+       * @param event
+       */
+      onSectionTestCreated(event) {
+        this.sectionsTests[this.currentSection] = event;
+      },
+
+
+      /**
+       * Handle section stepper component logic
+       *
+       * @param event
+       */
       onSectionsNumberChanged (val) {
         this.sections = parseInt(val)
       },
@@ -322,6 +402,14 @@
         }
       },
 
+      /**
+       * Show snackbar (notification bar)
+       *
+       * @param text
+       * @param color
+       * @param top
+       * @param right
+       */
       showSnackbar(text, color, top, right) {
         let settings = {
           timeout: 5000,
@@ -341,8 +429,10 @@
       window.scrollTo(0, 0);
 
       for(let i = 1; i <= this.courseSectionsMax; i++) {
+        this.sectionsNames[i] = '';
         this.sectionsVideo[i] = '';
         this.sectionsPdf[i] = '';
+        this.sectionsTests[i] = '';
       }
     }
   }

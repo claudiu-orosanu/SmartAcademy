@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Section[] $sections
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Course whereImageUrl($value)
  * @property string|null $image_url
+ * @property-read \App\Exam $exams
  */
 class Course extends Model
 {
@@ -49,5 +50,9 @@ class Course extends Model
     // relationships
     public function sections() {
         return $this->hasMany('App\Section');
+    }
+
+    public function exams() {
+        return $this->hasOne('App\Exam');
     }
 }

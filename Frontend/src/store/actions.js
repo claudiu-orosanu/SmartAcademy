@@ -115,8 +115,10 @@ export const createCourse = ({commit}, course) => {
     fd.append('image', course.image);
 
     for (let i in course.sectionsData) {
+      fd.append('sectionNames[]', course.sectionsData[i].name);
       fd.append('videos[]', course.sectionsData[i].video);
       fd.append('documents[]', course.sectionsData[i].pdf);
+      fd.append('exams[]', JSON.stringify(course.sectionsData[i].exam));
     }
 
     axios.post(`${apiUrl}/courses`, fd)

@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Answer;
 use App\Course;
 use App\Document;
+use App\Exam;
 use App\Http\Resources\CourseCollection;
 use App\Http\Resources\CourseResource;
+use App\Question;
 use App\Section;
 use App\Video;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -97,34 +99,17 @@ class CourseController extends Controller
             // create section
             $section = Section::create([
                 'order_number' => $i + 1,
-                'name' => 'tbd',
+                'name' => $request->input('sectionNames')[$i],
                 'course_id' => $course->id,
             ]);
 
-            // store video for section
-            $videoFile = $request->file('videos')[$i];
-            $videoPath = Storage::disk('public')->putFile('videos', $videoFile);
-            $videoUrl = Storage::url($videoPath);
+            $this->createVideoForSection($request, $i, $section);
+            $this->createDocumentForSection($request, $i, $course, $section);
+            $this->createExamForSection($request, $i, $section);
 
-            // create video for section
-            Video::create([
-                'name' => $videoFile->getClientOriginalName(),
-                'url' => $videoUrl,
-                'section_id' => $section->id,
-            ]);
-
-            // store document for section
-            $docFile = $request->file('documents')[$i];
-            $docPath = Storage::disk('public')->putFileAs('documents/' . $course->id, $docFile, $docFile->getClientOriginalName());
-            $docUrl = Storage::url($docPath);
-
-            // create document for section
-            Document::create([
-                'name' => $docFile->getClientOriginalName(),
-                'url' => $docUrl,
-                'section_id' => $section->id,
-            ]);
         }
+
+        // TODO create final exam for course
 
         return response($course);
     }
@@ -161,5 +146,85 @@ class CourseController extends Controller
     public function destroy(Course $course)
     {
         //
+    }
+
+    /**
+     * @param Request $request
+     * @param $i
+     * @param $section
+     */
+    private function createVideoForSection(Request $request, $i, $section)
+    {
+        // store video for section
+        $videoFile = $request->file('videos')[$i];
+        $videoPath = Storage::disk('public')->putFile('videos', $videoFile);
+        $videoUrl = Storage::url($videoPath);
+
+        // create video for section
+        Video::create([
+            'name' => $videoFile->getClientOriginalName(),
+            'url' => $videoUrl,
+            'section_id' => $section->id,
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param $i
+     * @param $course
+     * @param $section
+     */
+    private function createDocumentForSection(Request $request, $i, $course, $section): void
+    {
+        // store document for section
+        $docFile = $request->file('documents')[$i];
+        $docPath = Storage::disk('public')->putFileAs('documents/' . $course->id, $docFile, $docFile->getClientOriginalName());
+        $docUrl = Storage::url($docPath);
+
+        // create document for section
+        Document::create([
+            'name' => $docFile->getClientOriginalName(),
+            'url' => $docUrl,
+            'section_id' => $section->id,
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param $i
+     * @param $section
+     */
+    private function createExamForSection(Request $request, $i, $section)
+    {
+        $examData = json_decode($request->input('exams')[$i]);
+
+        // create exam for this section
+        $exam = Exam::create([
+            'section_id' => $section->id,
+            'course_id' => null
+        ]);
+
+        // create questions for exam
+        foreach ($examData->questions as $q) {
+            $question = Question::create([
+                'text' => $q->text,
+                'exam_id' => $exam->id
+            ]);
+
+            // create answers for this question
+            foreach (get_object_vars($q->answers) as $index => $ans) {
+
+                $answerIsCorrect = $q->correctAnswer === $index;
+
+                Answer::create([
+                    'order_number' => $index,
+                    'text' => $ans->text,
+                    'is_correct' => $answerIsCorrect,
+                    'question_id' => $question->id
+                ]);
+            }
+        }
+
+
     }
 }

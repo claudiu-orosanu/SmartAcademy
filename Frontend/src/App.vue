@@ -7,7 +7,7 @@
         <v-list class="pa-0">
           <v-list-tile avatar>
             <v-list-tile-avatar>
-              <img src="https://randomuser.me/api/portraits/men/85.jpg">
+              <img src="https://randomuser.me/api/portraits/men/33.jpg">
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>Claudiu Orosanu</v-list-tile-title>
