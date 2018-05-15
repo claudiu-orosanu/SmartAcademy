@@ -10,6 +10,10 @@
         <v-icon class="pr-2" medium color="primary">library_books</v-icon>
         Document
       </v-tab>
+      <v-tab>
+        <v-icon class="pr-2" medium color="primary">assignment</v-icon>
+        Test
+      </v-tab>
 
       <v-tabs-items>
 
@@ -51,11 +55,77 @@
                      type="application/pdf"/>
             </v-container>
           </v-tab-item>
+
+          <!--test-->
+          <v-tab-item>
+
+            <v-alert :value="score !== ''" :type="score >=  0.5 ? 'success' : 'error'">
+              {{testResultsText}}
+            </v-alert>
+
+            <v-container>
+              <v-layout row>
+                <v-flex xs10 class="mx-auto">
+
+                  <v-card v-for="(question, index) in exam.questions" :key="index" class="mb-3">
+
+                    <v-card-title class="rightMenuSelected">
+                      <div class="title">{{index+1}}. {{question.text}}</div>
+                    </v-card-title>
+
+                    <v-divider></v-divider>
+
+                    <v-card-text>
+                      <v-radio-group v-model="testData[index+1]">
+                        <v-radio v-for="answer in exam.questions[index].answers" :key="answer.text"
+                                 :label="answer.text"
+                                 :value="answer.order_number"
+                                 :color="examResults[index+1]  ? 'success' : examResults[index+1] == undefined ? 'info' : 'error'"
+                                 class="mb-1 ml-3"
+                        ></v-radio>
+                      </v-radio-group>
+
+
+                      <p v-show="Object.keys(examResults).length != 0"
+                         class="subheading"
+                      >{{examResults[index+1] ? 'Your answer is correct!' : 'Your answer is incorrect!'}}</p>
+
+                    </v-card-text>
+
+
+                  </v-card>
+
+                </v-flex>
+              </v-layout>
+            </v-container>
+
+
+
+            <v-layout row v-if="score != ''">
+              <v-flex class="text-xs-center">
+                <div class="subheading">
+                </div>
+              </v-flex>
+            </v-layout>
+
+            <!--Submit test button-->
+            <v-layout row class="mt-2">
+              <v-flex class="text-xs-center">
+                <v-btn
+                  :loading="loadingResults"
+                  :disabled="loadingResults"
+                  class="secondary"
+                  @click="onSubmitTest"
+                >Submit test</v-btn>
+              </v-flex>
+            </v-layout>
+
+          </v-tab-item>
         </div>
       </v-tabs-items>
     </v-tabs>
 
-    <span style="white-space: pre-wrap;">{{course.description}}</span>
+    <!--<span style="white-space: pre-wrap;">{{course.description}}</span>-->
 
     <div v-show="!loading">
       <!--right sidebar menu-->
@@ -91,9 +161,15 @@
       return {
         backendUrl: backendUrl,
         documentUrl: null,
+        exam: [],
         activeSection: 0,
 
+        testData: {},
+        examResults: {},
+        score: '',
+
         loading: true,
+        loadingResults: false,
 
         // videojs options
         playerOptions: {
@@ -118,6 +194,19 @@
 
       player() {
         return this.$refs.videoPlayer.player
+      },
+
+      testResultsText() {
+        let text;
+        if(this.score >= 0.5) {
+          text = 'Congratulations! You passed this test!';
+        } else {
+          text = 'Unfortunately, you did not pass the test. Study more and try again!';
+        }
+
+        text += ' (Your score: ' + this.score * 100 + ').';
+
+        return text;
       }
     },
 
@@ -128,14 +217,15 @@
           src: this.backendUrl + this.course.sections[newValue].videos[0].url,
         })
         this.documentUrl = this.backendUrl + this.course.sections[newValue].documents[0].url;
+        this.exam = this.course.sections[newValue].exams[0];
+
+        this.testData = {};
+        this.examResults = {};
+        this.score = '';
       }
     },
 
     created() {
-      // clear cached selected course if the new selected course is different
-      if (this.$store.getters.selectedCourse.id != this.$route.params.id) {
-        this.$store.dispatch('clearSelectedCourse');
-      }
 
       // get the new selected course
       this.$store.dispatch('getSelectedCourse', this.$route.params.id)
@@ -150,6 +240,7 @@
           })
 
           this.documentUrl = this.backendUrl + this.course.sections[0].documents[0].url;
+          this.exam = this.course.sections[0].exams[0];
         })
         .catch(err => console.log(err))
 
@@ -158,6 +249,55 @@
     methods: {
       playerReady(player) {
         player.currentTime(1);
+      },
+
+      /**
+       * Handle test submit
+       *
+       */
+      onSubmitTest() {
+        // check if user has answered all questions
+        if(Object.keys(this.testData).length != this.exam.questions.length) {
+          this.showSnackbar('You must answer all the questions before submitting the test!', 'error', true, false);
+          return;
+        }
+
+        this.loadingResults = true;
+
+        let payload = {
+          sectionNumber: this.activeSection + 1,
+          courseId: this.$route.params.id,
+          testData: this.testData
+        }
+
+        // send test data to backend to verify the answers
+        this.$store.dispatch('submitTest', payload)
+          .then(res => {
+            this.examResults = res.data.testResults;
+            this.score = res.data.score;
+            this.loadingResults = false;
+          })
+          .catch(err => console.log(err));
+      },
+
+      /**
+       * Show snackbar (notification bar)
+       *
+       * @param text
+       * @param color
+       * @param top
+       * @param right
+       */
+      showSnackbar(text, color, top, right) {
+        let settings = {
+          timeout: 5000,
+          text: text,
+          color: color,
+          top: top,
+          right: right,
+          show: true
+        }
+        this.$store.commit('showSnackbar', settings)
       }
     },
   }
@@ -166,6 +306,6 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .rightMenuSelected {
-    background-color: #92cbdb;
+    background-color: #76b3d3;
   }
 </style>

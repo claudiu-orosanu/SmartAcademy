@@ -149,6 +149,59 @@ class CourseController extends Controller
     }
 
     /**
+     * Handles test submission.
+     *
+     * @param  \App\Course  $course
+     * @return \Illuminate\Http\Response
+     */
+    public function submitTest(Request $request ,Course $course)
+    {
+        $sectionNumber = $request->query('sectionNumber');
+
+        // check if sections exists
+
+        $testData = json_decode($request->getContent(), true);
+
+        // get question from db
+        $questions = $course->sections->where('order_number', $sectionNumber)->first()->exams->first()->questions->all();
+
+        // check if all questions are answered
+        if(count($questions) != count($testData)) {
+
+            return response([
+                'error' => 'You must answer all questions'
+            ], 400);
+        }
+
+        $testResults = [];
+
+        // check answers
+        foreach ($questions as $index => $question) {
+            $correctAnswer = $question->answers->where('is_correct', true)->first();
+
+            if($testData[$index+1] == $correctAnswer->order_number) {
+                $testResults[$index+1] = true;
+            }
+            else {
+                $testResults[$index+1] = false;
+            }
+        }
+
+        $correctAnswers = array_reduce($testResults, function ($carry, $answer) {
+            if($answer) {
+                $carry += 1;
+            }
+            return $carry;
+        });
+        $score = $correctAnswers / count($testData);
+
+        return response([
+            'testResults' => $testResults,
+            'score' => $score
+        ]);
+    }
+
+    /**
      * @param Request $request
      * @param $i
      * @param $section

@@ -32,6 +32,8 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('videos', 'VideoController');
     Route::apiResource('documents', 'DocumentController');
     
+    Route::post('courses/{course}/submitTest', 'CourseController@submitTest');
+    
     
     
     

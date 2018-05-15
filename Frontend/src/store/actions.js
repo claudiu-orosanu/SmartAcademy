@@ -218,5 +218,24 @@ export const resetPassword = ({commit}, credentials) => {
   });
 }
 
+/**
+ * Handles test submit
+ */
+export const submitTest = ({commit}, payload) => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${apiUrl}/courses/${payload.courseId}/submitTest`, payload.testData, {
+      params: {
+        sectionNumber: payload.sectionNumber
+      }
+    })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}
+
 
 
