@@ -25,6 +25,16 @@ export function init(store, router) {
   // set default headers for all http requests
   axios.defaults.headers.common['Accept'] = 'application/json';
 
+  // set authorization header
+  axios.interceptors.request.use(
+    request => {
+      if(store.state.currentUser) {
+        request.headers['Authorization'] = 'Bearer ' + store.state.currentUser.token;
+      }
+      return request;
+    }
+  )
+
   axios.interceptors.response.use(
     response => {
       return response;

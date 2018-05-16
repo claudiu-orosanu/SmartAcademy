@@ -35,8 +35,8 @@
 
         <div v-show="!loading">
           <!--video lecture-->
-          <v-tab-item>
-            <v-container style="width: 670px">
+          <v-tab-item class="grey">
+            <v-container style="width: 670px" class="mt-4">
               <video-player class="vjs-custom-skin"
                             ref="videoPlayer"
                             :options="playerOptions"
@@ -68,7 +68,6 @@
                 <v-flex xs10 class="mx-auto">
 
                   <v-card v-for="(question, index) in exam.questions" :key="index" class="mb-3">
-
                     <v-card-title class="rightMenuSelected">
                       <div class="title">{{index+1}}. {{question.text}}</div>
                     </v-card-title>
@@ -91,22 +90,11 @@
                       >{{examResults[index+1] ? 'Your answer is correct!' : 'Your answer is incorrect!'}}</p>
 
                     </v-card-text>
-
-
                   </v-card>
 
                 </v-flex>
               </v-layout>
             </v-container>
-
-
-
-            <v-layout row v-if="score != ''">
-              <v-flex class="text-xs-center">
-                <div class="subheading">
-                </div>
-              </v-flex>
-            </v-layout>
 
             <!--Submit test button-->
             <v-layout row class="mt-2">
@@ -116,16 +104,16 @@
                   :disabled="loadingResults"
                   class="secondary"
                   @click="onSubmitTest"
-                >Submit test</v-btn>
+                >Submit test
+                </v-btn>
               </v-flex>
             </v-layout>
 
           </v-tab-item>
+
         </div>
       </v-tabs-items>
     </v-tabs>
-
-    <!--<span style="white-space: pre-wrap;">{{course.description}}</span>-->
 
     <div v-show="!loading">
       <!--right sidebar menu-->
@@ -198,7 +186,7 @@
 
       testResultsText() {
         let text;
-        if(this.score >= 0.5) {
+        if (this.score >= 0.5) {
           text = 'Congratulations! You passed this test!';
         } else {
           text = 'Unfortunately, you did not pass the test. Study more and try again!';
@@ -257,7 +245,7 @@
        */
       onSubmitTest() {
         // check if user has answered all questions
-        if(Object.keys(this.testData).length != this.exam.questions.length) {
+        if (Object.keys(this.testData).length != this.exam.questions.length) {
           this.showSnackbar('You must answer all the questions before submitting the test!', 'error', true, false);
           return;
         }

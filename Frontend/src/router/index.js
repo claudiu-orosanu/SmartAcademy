@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '../components/HelloWorld'
 import Courses from '../components/courses/Courses'
 import Course from '../components/courses/Course'
+import CourseDetails from '../components/courses/CourseDetails'
 import CreateCourse from '../components/courses/CreateCourse/CreateCourse'
 import Login from '../components/auth/Login'
 import Register from '../components/auth/Register'
@@ -54,6 +54,11 @@ const router = new Router({
       meta: {
         requiresAuth: true
       }
+    },
+    {
+      path: '/courses/:id/details',
+      name: 'CourseDetails',
+      component: CourseDetails
     }
   ]
 })

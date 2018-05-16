@@ -1,16 +1,18 @@
 <template>
-  <v-app>
+  <v-app :dark="nightMode">
 
     <!--left sidebar menu-->
     <v-navigation-drawer app v-model="leftDrawer" clipped floating>
-      <v-toolbar flat class="transparent">
+
+      <!--name and avatar-->
+      <v-toolbar v-if="currentUser" flat class="transparent">
         <v-list class="pa-0">
           <v-list-tile avatar>
             <v-list-tile-avatar>
-              <img src="https://randomuser.me/api/portraits/men/33.jpg">
+              <img :src="'https://ui-avatars.com/api/?name=' + currentUser.first_name + '+' + currentUser.last_name">
             </v-list-tile-avatar>
             <v-list-tile-content>
-              <v-list-tile-title>Claudiu Orosanu</v-list-tile-title>
+              <v-list-tile-title>{{currentUser.first_name}} {{currentUser.last_name}}</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
         </v-list>
@@ -60,6 +62,10 @@
       <router-link tag="v-toolbar-title" to="/" style="cursor: pointer">Smart Academy</router-link>
       <v-spacer></v-spacer>
       <v-toolbar-items>
+        <v-btn flat @click.stop="nightMode = !nightMode">
+          <v-icon>invert_colors</v-icon>
+        </v-btn>
+
         <template v-if="isAuthenticated">
           <v-menu offset-y left>
             <v-btn flat dark slot="activator">
@@ -127,7 +133,8 @@
 
     data () {
       return {
-        leftDrawer: true
+        leftDrawer: true,
+        nightMode: false
       }
     },
 

@@ -14,12 +14,18 @@ class CourseResource extends JsonResource
      */
     public function toArray($request)
     {
+        $user = auth()->user();
+        $is_enrolled = $user ? !!$this->users->where('id', $user->id)->first() : false;
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
             'category' => $this->category,
+            'price' => $this->price,
             'image_url' => $this->image_url,
+            'teacher_id' => $this->teacher_id,
+            'is_enrolled' => $is_enrolled,
             'sections' => SectionResource::collection($this->sections),
         ];
 

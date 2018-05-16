@@ -10,9 +10,11 @@ use App\Http\Resources\CourseCollection;
 use App\Http\Resources\CourseResource;
 use App\Question;
 use App\Section;
+use App\User;
 use App\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\UnauthorizedException;
 
 class CourseController extends Controller
 {
@@ -63,6 +65,8 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
+        $user = auth()->user();
+
         // is user authenticated?
 
         // is user teacher?
@@ -90,6 +94,7 @@ class CourseController extends Controller
             'price' => $request->input('price'),
             'category' => $request->input('category'),
             'image_url' => $imageUrl,
+            'teacher_id' => $user->id,
         ]);
 
         // create sections for this course
@@ -154,7 +159,7 @@ class CourseController extends Controller
      * @param  \App\Course  $course
      * @return \Illuminate\Http\Response
      */
-    public function submitTest(Request $request ,Course $course)
+    public function submitTest(Request $request, Course $course)
     {
         $sectionNumber = $request->query('sectionNumber');
 
@@ -198,6 +203,41 @@ class CourseController extends Controller
         return response([
             'testResults' => $testResults,
             'score' => $score
+        ]);
+    }
+
+    /**
+     * Handles course enrollment.
+     *
+     * @param  \App\Course  $course
+     * @return \Illuminate\Http\Response
+     */
+    public function enroll(Request $request, Course $course)
+    {
+        $user = auth()->user();
+
+        // check if user is authenticated
+        if(!$user){
+            return response([
+                'error' => 'Unauthorized.'
+            ], 401);
+        }
+
+        // check if user is already enrolled
+        if($user->courses->where('id', $course->id)->first()) {
+            return response([
+                'error' => 'User is already enrolled in this course'
+            ], 400);
+        }
+
+        $user->courses()->attach($course->id, [
+            'is_completed' => false,
+            'created_at' => new \DateTime(),
+            'updated_at' => new \DateTime(),
+        ]);
+
+        return response([
+            'message' => 'You have successfully enrolled in this course!'
         ]);
     }
 
@@ -277,7 +317,5 @@ class CourseController extends Controller
                 ]);
             }
         }
-
-
     }
 }

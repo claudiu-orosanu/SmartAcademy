@@ -33,7 +33,8 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('documents', 'DocumentController');
     
     Route::post('courses/{course}/submitTest', 'CourseController@submitTest');
-    
+    Route::post('courses/{course}/enroll', 'CourseController@enroll');
+
     
     
     

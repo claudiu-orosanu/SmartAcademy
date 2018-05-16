@@ -18,9 +18,11 @@ class SectionResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'order_number' => $this->order_number,
-            'videos' => VideoResource::collection($this->videos),
-            'documents' => DocumentResource::collection($this->documents),
-            'exams' => ExamResource::collection($this->exams),
+            $this->mergeWhen(auth()->check(), [
+                'videos' => VideoResource::collection($this->videos),
+                'documents' => DocumentResource::collection($this->documents),
+                'exams' => ExamResource::collection($this->exams),
+            ]),
         ];
 
     }

@@ -77,4 +77,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+
+    // relationships
+    /**
+     * The courses that the user is enrolled in.
+     */
+    public function courses()
+    {
+        return $this->belongsToMany('App\Course', 'enrollments', 'course_id', 'user_id');
+    }
 }

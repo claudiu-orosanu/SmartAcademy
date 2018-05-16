@@ -76,7 +76,11 @@ export const getSelectedCourse = ({commit}, courseId) => {
   return new Promise((resolve, reject) => {
 
     // make api call to get the selected course
-    axios.get(`${apiUrl}/courses/` + courseId)
+    axios.get(`${apiUrl}/courses/` + courseId, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
       .then(response => {
         commit('setSelectedCourse', response.data);
         resolve();
@@ -175,11 +179,7 @@ export const register = ({commit}, credentials) => {
 
 export const logout = ({commit, state}) => {
   return new Promise((resolve, reject) => {
-    axios.post(`${apiUrl}/auth/logout`,{}, {
-      headers: {
-        Authorization: `Bearer ${state.currentUser.token}`
-      }
-    })
+    axios.post(`${apiUrl}/auth/logout`)
       .then(response => {
         commit('setCurrentUser', null);
         resolve(response);
@@ -204,11 +204,7 @@ export const recoverPassword = ({commit}, credentials) => {
 
 export const resetPassword = ({commit}, credentials) => {
   return new Promise((resolve, reject) => {
-    axios.post(`${backendUrl}/password/reset`, credentials, {
-      params: {
-        XDEBUG_SESSION_START: 'PHPSTORM'
-      }
-    })
+    axios.post(`${backendUrl}/password/reset`, credentials)
       .then(response => {
         resolve(response);
       })
@@ -226,6 +222,25 @@ export const submitTest = ({commit}, payload) => {
     axios.post(`${apiUrl}/courses/${payload.courseId}/submitTest`, payload.testData, {
       params: {
         sectionNumber: payload.sectionNumber
+      }
+    })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}
+
+/**
+ * Handles course enrollment
+ */
+export const enroll = ({commit, state}, courseId) => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${apiUrl}/courses/${courseId}/enroll`, {}, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
       }
     })
       .then(response => {

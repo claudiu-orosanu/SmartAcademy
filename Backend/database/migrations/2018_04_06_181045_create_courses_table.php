@@ -21,8 +21,8 @@ class CreateCoursesTable extends Migration
             $table->string('image_url')->nullable();
             $table->decimal('price');
 
-//            $table->integer('teacher_id')->unsigned()->nullable();
-//            $table->foreign('teacher_id')->references('id')->on('teachers');
+            $table->integer('teacher_id')->unsigned()->nullable();
+            $table->foreign('teacher_id')->references('id')->on('users');
 
             $table->timestamps();
         });

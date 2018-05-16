@@ -92,7 +92,7 @@
         this.$store.dispatch('login', credentials)
           .then(() => {
             this.errors = [];
-            this.$router.push('/courses');
+            this.$router.back();
           })
           .catch(err => {
             this.errors = err;

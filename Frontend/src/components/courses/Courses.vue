@@ -42,7 +42,7 @@
     <!--courses container-->
     <v-container grid-list-xl>
       <v-layout row wrap>
-        <v-flex xs6 sm4 v-for="(course,index) in courses" :key="index" @click="goToCourse(course)" style="cursor: pointer">
+        <v-flex xs6 sm4 v-for="(course,index) in courses" :key="index" @click="goToCourseDetails(course)" style="cursor: pointer">
           <v-card dark color="accent">
             <v-card-media
               :src="backendUrl + course.image_url"
@@ -138,8 +138,8 @@
         return constants.courseCategories[categoryId]
       },
 
-      goToCourse(course){
-        this.$router.push('/courses/' + course.id);
+      goToCourseDetails(course){
+        this.$router.push('/courses/' + course.id +'/details');
       },
 
       refreshCourses: function() {

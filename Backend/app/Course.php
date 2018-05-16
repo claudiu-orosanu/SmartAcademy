@@ -44,7 +44,7 @@ class Course extends Model
         'category',
         'price',
         'image_url',
-//        'teacher_id',
+        'teacher_id',
     ];
 
     // relationships
@@ -55,4 +55,13 @@ class Course extends Model
     public function exams() {
         return $this->hasOne('App\Exam');
     }
+
+    /**
+     * The users that are enrolled in this course.
+     */
+    public function users()
+    {
+        return $this->belongsToMany('App\User', 'enrollments', 'user_id', 'course_id');
+    }
+
 }
