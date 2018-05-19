@@ -48,12 +48,27 @@ class Course extends Model
     ];
 
     // relationships
-    public function sections() {
+
+    /**
+     * The sections for this course.
+     */public function sections() {
         return $this->hasMany('App\Section');
     }
 
+
+    /**
+     * The exam for this course.
+     */
     public function exams() {
         return $this->hasOne('App\Exam');
+    }
+
+    /**
+     * The creator of this course.
+     */
+    public function teacher()
+    {
+        return $this->belongsTo('App\User', 'teacher_id', 'id');
     }
 
     /**
@@ -61,7 +76,20 @@ class Course extends Model
      */
     public function users()
     {
-        return $this->belongsToMany('App\User', 'enrollments', 'user_id', 'course_id');
+        return $this->belongsToMany('App\User', 'enrollments', 'course_id', 'user_id')
+            ->withPivot('is_completed')
+            ->withTimestamps();
+    }
+
+    /**
+     * The users that are enrolled in this course.
+     */
+    public function usersThatReviewed()
+    {
+        return $this
+            ->belongsToMany('App\User', 'reviews', 'course_id', 'user_id')
+            ->withPivot('score', 'text')
+            ->withTimestamps();
     }
 
 }

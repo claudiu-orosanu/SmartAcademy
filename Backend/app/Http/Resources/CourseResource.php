@@ -15,7 +15,25 @@ class CourseResource extends JsonResource
     public function toArray($request)
     {
         $user = auth()->user();
-        $is_enrolled = $user ? !!$this->users->where('id', $user->id)->first() : false;
+        $isEnrolled = $user ? !!$this->users->where('id', $user->id)->first() : false;
+        $isReviewedByUser = false;
+
+        $reviews = [];
+        foreach ($this->usersThatReviewed()->orderBy('created_at', 'desc')->get() as $u) {
+
+            $review = [
+                'score' => $u->pivot->score,
+                'text' => $u->pivot->text,
+                'created_at' => $u->pivot->created_at,
+                'user' => new UserResource($u),
+            ];
+
+            array_push($reviews, $review);
+
+            if($user && $u->id == $user->id) {
+                $isReviewedByUser = true;
+            }
+        }
 
         return [
             'id' => $this->id,
@@ -24,8 +42,10 @@ class CourseResource extends JsonResource
             'category' => $this->category,
             'price' => $this->price,
             'image_url' => $this->image_url,
-            'teacher_id' => $this->teacher_id,
-            'is_enrolled' => $is_enrolled,
+            'teacher' => new UserResource($this->teacher),
+            'isEnrolled' => $isEnrolled,
+            'isReviewedByUser' => $isReviewedByUser,
+            'reviews' => $reviews,
             'sections' => SectionResource::collection($this->sections),
         ];
 

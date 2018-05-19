@@ -19,3 +19,8 @@ export const showSnackbar = (state, settings) => {
   state.snackBar = settings;
 }
 
+export const reviewCourse = (state, review) => {
+  state.selectedCourse.reviews.unshift(review);
+  state.selectedCourse.isReviewedByUser = true;
+}
+

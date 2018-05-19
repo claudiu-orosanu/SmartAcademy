@@ -125,7 +125,11 @@ export const createCourse = ({commit}, course) => {
       fd.append('exams[]', JSON.stringify(course.sectionsData[i].exam));
     }
 
-    axios.post(`${apiUrl}/courses`, fd)
+    axios.post(`${apiUrl}/courses`, fd, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
       .then((response) => {
         resolve(response);
       })
@@ -244,6 +248,29 @@ export const enroll = ({commit, state}, courseId) => {
       }
     })
       .then(response => {
+        resolve(response);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}
+
+/**
+ * Handles course review
+ */
+export const reviewCourse = ({commit, state}, payload) => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${apiUrl}/courses/${payload.courseId}/review`, {
+      score: payload.score,
+      text: payload.text
+    }, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then(response => {
+        commit('reviewCourse', response.data.data);
         resolve(response);
       })
       .catch(err => {

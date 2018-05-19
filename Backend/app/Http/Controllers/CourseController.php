@@ -8,6 +8,7 @@ use App\Document;
 use App\Exam;
 use App\Http\Resources\CourseCollection;
 use App\Http\Resources\CourseResource;
+use App\Http\Resources\ReviewResource;
 use App\Question;
 use App\Section;
 use App\User;
@@ -238,6 +239,45 @@ class CourseController extends Controller
 
         return response([
             'message' => 'You have successfully enrolled in this course!'
+        ]);
+    }
+
+    /**
+     * Handles course review.
+     *
+     * @param  \App\Course  $course
+     * @return \Illuminate\Http\Response
+     */
+    public function reviewCourse(Request $request, Course $course)
+    {
+        $user = auth()->user();
+
+        // check if user is authenticated
+        if(!$user){
+            return response([
+                'error' => 'Unauthorized.'
+            ], 401);
+        }
+
+        // check if user has already reviewed
+        if($user->reviewedCourses->where('id', $course->id)->first()) {
+            return response([
+                'error' => 'User has already reviewed this course'
+            ], 400);
+        }
+
+        $user->reviewedCourses()->attach($course->id, [
+            'score' => $request->input('score'),
+            'text' => $request->input('text'),
+            'created_at' => new \DateTime(),
+            'updated_at' => new \DateTime(),
+        ]);
+
+        $user->load('reviewedCourses');
+
+        return response([
+            'message' => 'You have successfully reviewed this course!',
+            'data' => new ReviewResource($user->reviewedCourses->last()->pivot)
         ]);
     }
 

@@ -65,7 +65,7 @@
               <div>
                 <v-radio-group v-model="questions[i].correctAnswer">
                   <v-layout row v-for="answer in questions[i].answersTotal" :key="answer" class="pb-2">
-                    <v-flex xs1>
+                    <v-flex sm1>
                       <v-radio :value="answer" color="success" style="top:15px"></v-radio>
                     </v-flex>
                     <v-flex>

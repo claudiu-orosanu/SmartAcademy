@@ -85,6 +85,18 @@ class User extends Authenticatable implements JWTSubject
      */
     public function courses()
     {
-        return $this->belongsToMany('App\Course', 'enrollments', 'course_id', 'user_id');
+        return $this->belongsToMany('App\Course', 'enrollments', 'user_id', 'course_id')
+            ->withPivot('is_completed')
+            ->withTimestamps();
+    }
+
+    /**
+     * The courses that the user has reviewed.
+     */
+    public function reviewedCourses()
+    {
+        return $this->belongsToMany('App\Course', 'reviews', 'user_id', 'course_id')
+            ->withPivot('score', 'text')
+            ->withTimestamps();
     }
 }

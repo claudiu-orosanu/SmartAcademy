@@ -25,13 +25,13 @@
             <v-card-title>
               <div class="display-1">{{course.name}}</div>
               <v-spacer></v-spacer>
-              <div v-show="!course.is_enrolled" class="title">({{course.price}}$)</div>
+              <div v-show="!course.isEnrolled" class="title">({{course.price}}$)</div>
               <v-btn
                 color="success" large
                 @click="onEnrollButtonClicked"
               >
-                <v-icon left v-show="course.is_enrolled">launch</v-icon>
-                {{course.is_enrolled ? 'Start' : 'Enroll'}}
+                <v-icon left v-show="course.isEnrolled">launch</v-icon>
+                {{course.isEnrolled ? 'Start' : 'Enroll'}}
               </v-btn>
             </v-card-title>
 
@@ -82,11 +82,73 @@
 
                 <!--teacher-->
                 <v-tab-item>
-
+                  <v-divider></v-divider>
+                  <v-card>
+                    <v-card-title>
+                      <v-avatar>
+                        <img src="https://randomuser.me/api/portraits/men/33.jpg" alt="avatar">
+                      </v-avatar>
+                      <span class="title ml-3">
+                        {{teacherName}}
+                      </span>
+                    </v-card-title>
+                    <v-card-text>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-btn flat color="secondary">View Profile</v-btn>
+                    </v-card-actions>
+                  </v-card>
                 </v-tab-item>
 
                 <!--reviews-->
                 <v-tab-item>
+                  <v-divider></v-divider>
+
+                  <v-container>
+                    <v-layout v-show="!course.isReviewedByUser" row>
+                      <v-flex class="text-xs-right">
+                        <v-btn color="accent lighten" @click="showReviewWindow = !showReviewWindow">
+                          Review
+                        </v-btn>
+                      </v-flex>
+                    </v-layout>
+
+                    <v-layout row v-for="(review, i) in course.reviews" :key="i">
+                      <v-flex>
+                        <v-card flat>
+                          <v-card-title>
+                            <v-avatar>
+                              <img src="https://randomuser.me/api/portraits/men/33.jpg" alt="avatar">
+                            </v-avatar>
+                            <span class="title ml-3">
+                        {{review.user.first_name}} {{review.user.last_name}}
+                      </span>
+                          </v-card-title>
+                          <v-card-text>
+                            <star-rating
+                              :increment="0.5"
+                              :star-size="30"
+                              :glow="3"
+                              :rating="parseInt(review.score)"
+                              read-only
+                            ></star-rating>
+                          </v-card-text>
+                          <v-card-text>
+                            {{review.text}}
+                          </v-card-text>
+
+                          <v-divider></v-divider>
+                        </v-card>
+                      </v-flex>
+                    </v-layout>
+                  </v-container>
+
+                  <div>
+                  </div>
+
+
+
 
                 </v-tab-item>
 
@@ -122,23 +184,65 @@
       </v-card>
     </v-dialog>
 
+    <!--review window-->
+    <v-dialog v-model="showReviewWindow" max-width="500" scrollable>
+      <v-card>
+        <v-card-title class="headline">What did you think about this course?</v-card-title>
+        <form @submit.prevent="onReview">
+          <v-container>
+            <star-rating
+              :increment="0.5"
+              :star-size="40"
+              :glow="5"
+              v-model="reviewScore"
+            >
+            </star-rating>
+            <v-text-field
+              class="mt-3"
+              name="reviewText"
+              label="Type here"
+              :rules="[(v) => v.length <= 255 || 'Max 255 characters']"
+              :counter="255"
+              v-model="reviewText"
+              multi-line
+              required
+            ></v-text-field>
+          </v-container>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="success" flat="flat" @click.native="showReviewWindow = false">Cancel</v-btn>
+            <v-btn type="submit" color="success" flat="flat">Review</v-btn>
+          </v-card-actions>
+        </form>
+      </v-card>
+    </v-dialog>
+
   </div>
 </template>
 
 <script>
   import {mapGetters} from 'vuex';
   import {backendUrl} from '@/config';
+  import StarRating from 'vue-star-rating'
 
   export default {
     name: 'CourseDetails',
 
-    components: {},
+    components: {
+      StarRating
+    },
 
     data() {
       return {
         backendUrl: backendUrl,
         loading: true,
         showEnrollModal: false,
+
+        showReviewWindow: false,
+        reviewText: '',
+        reviewScore: 0,
+
       }
     },
 
@@ -147,6 +251,12 @@
         course: 'selectedCourse',
         isAuthenticated: 'isAuthenticated'
       }),
+      teacherName(){
+        if(this.course.teacher) {
+          return this.course.teacher.first_name + ' ' + this.course.teacher.last_name;
+        }
+        return '';
+      }
     },
 
     watch: {},
@@ -161,13 +271,17 @@
     },
 
     methods: {
+
+      /**
+       * User clicks Enroll button -> opens enrollment window.
+       */
       onEnrollButtonClicked(){
         if(!this.isAuthenticated) {
           this.$router.push('/login');
           return;
         }
 
-        if(this.course.is_enrolled) {
+        if(this.course.isEnrolled) {
           this.$router.push('/courses/' + this.course.id);
           return;
         }
@@ -175,14 +289,54 @@
         this.showEnrollModal = true;
       },
 
+      /**
+       * User enrolls in a course.
+       */
       onEnroll() {
-
         this.$store.dispatch('enroll', this.course.id)
           .then(res => {
             this.$router.push('/courses/' + this.course.id);
             this.showEnrollModal = false;
           })
           .catch(err => console.log(err))
+      },
+
+      /**
+       * User reviews a course.
+       */
+      onReview() {
+        let payload = {
+          courseId: this.course.id,
+          score: this.reviewScore,
+          text: this.reviewText
+        }
+
+        this.$store.dispatch('reviewCourse', payload)
+          .then(res => {
+            this.showReviewWindow = false;
+            this.showSnackbar('You have successfully reviewed this course!', 'success', true, true);
+          })
+          .catch(err => console.log(err))
+      },
+
+      /**
+       * Show snackbar (notification bar)
+       *
+       * @param text
+       * @param color
+       * @param top
+       * @param right
+       */
+      showSnackbar(text, color, top, right) {
+        let settings = {
+          timeout: 5000,
+          text: text,
+          color: color,
+          top: top,
+          right: right,
+          show: true
+        }
+        this.$store.commit('showSnackbar', settings)
       }
     },
   }
