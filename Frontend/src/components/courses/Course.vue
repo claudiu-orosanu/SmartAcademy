@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <v-tabs height="73%" fixed-tabs grow>
+    <v-tabs v-show="!isFinalExam" height="73%" fixed-tabs grow>
       <v-tab>
         <v-icon class="pr-2" medium color="primary">video_library</v-icon>
         Video Lecture
@@ -75,11 +75,11 @@
                     <v-divider></v-divider>
 
                     <v-card-text>
-                      <v-radio-group v-model="testData[index+1]">
+                      <v-radio-group v-model="testData[question.id]">
                         <v-radio v-for="answer in exam.questions[index].answers" :key="answer.text"
                                  :label="answer.text"
                                  :value="answer.order_number"
-                                 :color="examResults[index+1]  ? 'success' : examResults[index+1] == undefined ? 'info' : 'error'"
+                                 :color="answerColor(question.id)"
                                  class="mb-1 ml-3"
                         ></v-radio>
                       </v-radio-group>
@@ -87,7 +87,7 @@
 
                       <p v-show="Object.keys(examResults).length != 0"
                          class="subheading"
-                      >{{examResults[index+1] ? 'Your answer is correct!' : 'Your answer is incorrect!'}}</p>
+                      >{{answerFeedback(question.id)}}</p>
 
                     </v-card-text>
                   </v-card>
@@ -115,6 +115,66 @@
       </v-tabs-items>
     </v-tabs>
 
+    <!--FINAL EXAM-->
+    <div v-show="isFinalExam">
+      <v-alert :value="score !== ''" :type="score >=  0.5 ? 'success' : 'error'">
+        {{testResultsText}}
+      </v-alert>
+
+      <v-container>
+
+        <v-layout row class="mb-3">
+          <v-flex class="text-xs-center">
+            <div class="display-1">Final Exam</div>
+          </v-flex>
+        </v-layout>
+
+        <v-layout row>
+          <v-flex xs10 class="mx-auto">
+
+            <v-card v-for="(question, index) in exam.questions" :key="index" class="mb-3">
+              <v-card-title class="rightMenuSelected">
+                <div class="title">{{index+1}}. {{question.text}}</div>
+              </v-card-title>
+
+              <v-divider></v-divider>
+
+              <v-card-text>
+                <v-radio-group v-model="testData[question.id]">
+                  <v-radio v-for="answer in exam.questions[index].answers" :key="answer.text"
+                           :label="answer.text"
+                           :value="answer.order_number"
+                           :color="answerColor(question.id)"
+                           class="mb-1 ml-3"
+                  ></v-radio>
+                </v-radio-group>
+
+
+                <p v-show="Object.keys(examResults).length != 0"
+                   class="subheading"
+                >{{answerFeedback(question.id)}}</p>
+
+              </v-card-text>
+            </v-card>
+
+          </v-flex>
+        </v-layout>
+      </v-container>
+
+      <!--Submit test button-->
+      <v-layout row class="mt-2">
+        <v-flex class="text-xs-center">
+          <v-btn
+            :loading="loadingResults"
+            :disabled="loadingResults"
+            class="secondary"
+            @click="onSubmitTest"
+          >Submit exam
+          </v-btn>
+        </v-flex>
+      </v-layout>
+    </div>
+
     <div v-show="!loading">
       <!--right sidebar menu-->
       <v-navigation-drawer app right clipped class="rightMenu" width="190">
@@ -125,9 +185,13 @@
           >
             <v-list-tile-title class="pl-5">Section {{index + 1}}</v-list-tile-title>
           </v-list-tile>
+          <v-list-tile @click="activeSection = -1" :class="{rightMenuSelected: activeSection === -1}">
+            <v-list-tile-title class="pl-5">Final Exam</v-list-tile-title>
+          </v-list-tile>
         </v-list>
       </v-navigation-drawer>
     </div>
+
   </div>
 </template>
 
@@ -152,6 +216,7 @@
         exam: [],
         activeSection: 0,
 
+        isFinalExam: false,
         testData: {},
         examResults: {},
         score: '',
@@ -200,16 +265,24 @@
 
     watch: {
       activeSection: function (newValue, oldValue) {
+        this.testData = {};
+        this.examResults = {};
+        this.score = '';
+
+        if(newValue === -1) { // final exam
+          this.exam = this.course.finalExam;
+          this.isFinalExam = true;
+          return;
+        }
+
+        this.isFinalExam = false;
+
         this.$set(this.playerOptions.sources, 0, {
           type: "video/mp4",
           src: this.backendUrl + this.course.sections[newValue].videos[0].url,
         })
         this.documentUrl = this.backendUrl + this.course.sections[newValue].documents[0].url;
         this.exam = this.course.sections[newValue].exams[0];
-
-        this.testData = {};
-        this.examResults = {};
-        this.score = '';
       }
     },
 
@@ -239,6 +312,34 @@
         player.currentTime(1);
       },
 
+      answerColor: function(i) {
+        let color = 'info';
+        if(this.examResults[i] && this.examResults[i].correct) {
+          color = 'success';
+        }
+        else if (this.examResults[i] && !this.examResults[i].correct) {
+          color = 'error';
+        }
+        return color;
+      },
+
+      answerFeedback: function(i) {
+        let text = 'info';
+        if(this.examResults[i] && this.examResults[i].correct) {
+          text = 'Your answer is correct!';
+        }
+        else if (this.examResults[i] && !this.examResults[i].correct) {
+          text = 'Your answer is wrong!';
+
+          if(this.isFinalExam) {
+            let relatedSection = this.examResults[i].relatedSection;
+            text += ' You should revisit Section ' + relatedSection.order_number + ' (' + relatedSection.name + '). ' +
+              'You will find there the concepts related to this question.'
+          }
+        }
+        return text;
+      },
+
       /**
        * Handle test submit
        *
@@ -264,6 +365,9 @@
             this.examResults = res.data.testResults;
             this.score = res.data.score;
             this.loadingResults = false;
+
+            // scroll to top
+            window.scrollTo(0, 0);
           })
           .catch(err => console.log(err));
       },

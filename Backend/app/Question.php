@@ -29,10 +29,18 @@ class Question extends Model
     ];
 
     // relationships
-    public function exam() {
-        return $this->belongsTo('App\Exam');
+
+    /**
+     * The exams that this question belongs to.
+     */
+    public function exams()
+    {
+        return $this->belongsToMany('App\Exam', 'exam_questions', 'question_id', 'exam_id');
     }
 
+    /**
+     * The answers for this questions.
+     */
     public function answers() {
         return $this->hasMany('App\Answer');
     }

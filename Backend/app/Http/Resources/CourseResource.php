@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 class CourseResource extends JsonResource
 {
@@ -17,6 +18,13 @@ class CourseResource extends JsonResource
         $user = auth()->user();
         $isEnrolled = $user ? !!$this->users->where('id', $user->id)->first() : false;
         $isReviewedByUser = false;
+
+        $finalExamQuestions = $this->exam->questions->all();
+        shuffle($finalExamQuestions);
+        $finalExam = [];
+        foreach ($finalExamQuestions as $finalExamQuestion) {
+            $finalExam['questions'][] = new QuestionResource($finalExamQuestion);
+        }
 
         $reviews = [];
         foreach ($this->usersThatReviewed()->orderBy('created_at', 'desc')->get() as $u) {
@@ -46,6 +54,7 @@ class CourseResource extends JsonResource
             'isEnrolled' => $isEnrolled,
             'isReviewedByUser' => $isReviewedByUser,
             'reviews' => $reviews,
+            'finalExam' => $finalExam,
             'sections' => SectionResource::collection($this->sections),
         ];
 

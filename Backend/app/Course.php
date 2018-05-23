@@ -59,7 +59,7 @@ class Course extends Model
     /**
      * The exam for this course.
      */
-    public function exams() {
+    public function exam() {
         return $this->hasOne('App\Exam');
     }
 

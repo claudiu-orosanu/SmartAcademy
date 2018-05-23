@@ -115,7 +115,7 @@ class CourseController extends Controller
 
         }
 
-        // TODO create final exam for course
+        $this->createFinalExam($course);
 
         return response($course);
     }
@@ -157,19 +157,25 @@ class CourseController extends Controller
     /**
      * Handles test submission.
      *
-     * @param  \App\Course  $course
+     * @param Request $request
+     * @param  \App\Course $course
      * @return \Illuminate\Http\Response
      */
     public function submitTest(Request $request, Course $course)
     {
-        $sectionNumber = $request->query('sectionNumber');
+        $sectionNumber = (int) $request->query('sectionNumber');
+        $isFinalExam = $sectionNumber === 0;
 
         // check if sections exists
 
         $testData = json_decode($request->getContent(), true);
 
         // get question from db
-        $questions = $course->sections->where('order_number', $sectionNumber)->first()->exams->first()->questions->all();
+        if($isFinalExam) {
+            $questions = $course->exam->questions->all();
+        } else {
+            $questions = $course->sections->where('order_number', $sectionNumber)->first()->exams->first()->questions->all();
+        }
 
         // check if all questions are answered
         if(count($questions) != count($testData)) {
@@ -185,21 +191,31 @@ class CourseController extends Controller
         foreach ($questions as $index => $question) {
             $correctAnswer = $question->answers->where('is_correct', true)->first();
 
-            if($testData[$index+1] == $correctAnswer->order_number) {
-                $testResults[$index+1] = true;
+            if($testData[$question->id] == $correctAnswer->order_number) {
+
+                $testResults[$question->id] = [
+                    'correct' => true,
+                ];
             }
             else {
-                $testResults[$index+1] = false;
+                $testResults[$question->id] = [
+                    'correct' => false,
+                ];
+            }
+
+            if($isFinalExam){
+                $relatedSection = $question->exams->where('section_id','<>','')->first()->section;
+                $testResults[$question->id]['relatedSection'] = $relatedSection;
             }
         }
 
         $correctAnswers = array_reduce($testResults, function ($carry, $answer) {
-            if($answer) {
+            if($answer['correct']) {
                 $carry += 1;
             }
             return $carry;
         });
-        $score = $correctAnswers / count($testData);
+        $score = round($correctAnswers / count($testData), 2);
 
         return response([
             'testResults' => $testResults,
@@ -341,8 +357,9 @@ class CourseController extends Controller
         foreach ($examData->questions as $q) {
             $question = Question::create([
                 'text' => $q->text,
-                'exam_id' => $exam->id
             ]);
+
+            $exam->questions()->attach($question->id);
 
             // create answers for this question
             foreach (get_object_vars($q->answers) as $index => $ans) {
@@ -356,6 +373,38 @@ class CourseController extends Controller
                     'question_id' => $question->id
                 ]);
             }
+        }
+    }
+
+    /**
+     * @param $course
+     */
+    private function createFinalExam($course)
+    {
+        $allQuestions = [];
+
+        foreach ($course->sections as $section) {
+            $examQuestions = $section->exams->first()->questions->all();
+            foreach ($examQuestions as $examQuestion) {
+                $allQuestions[] = $examQuestion;
+            }
+        }
+        
+        if(count($allQuestions) > 30) {
+            $allQuestions = array_random($allQuestions, 30);
+        } else {
+            shuffle($allQuestions);
+        }
+
+        // create exam for this section
+        $exam = Exam::create([
+            'section_id' => null,
+            'course_id' => $course->id
+        ]);
+
+        // create questions for exam
+        foreach ($allQuestions as $q) {
+            $exam->questions()->attach($q->id);
         }
     }
 }

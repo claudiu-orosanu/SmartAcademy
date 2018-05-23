@@ -17,8 +17,6 @@ class CreateQuestionsTable extends Migration
             $table->increments('id');
             $table->string('text');
 
-            $table->integer('exam_id')->unsigned()->nullable();
-            $table->foreign('exam_id')->references('id')->on('exams');
             $table->timestamps();
         });
     }

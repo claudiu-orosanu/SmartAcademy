@@ -38,8 +38,11 @@ class Exam extends Model
     public function course() {
         return $this->belongsTo('App\Course');
     }
-
-    public function questions() {
-        return $this->hasMany('App\Question');
+    /**
+     * The questions for this exam.
+     */
+    public function questions()
+    {
+        return $this->belongsToMany('App\Question', 'exam_questions', 'exam_id', 'question_id');
     }
 }
