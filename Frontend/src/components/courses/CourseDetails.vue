@@ -26,13 +26,16 @@
               <div class="display-1">{{course.name}}</div>
               <v-spacer></v-spacer>
               <div v-show="!course.isEnrolled" class="title">({{course.price}}$)</div>
-              <v-btn
-                color="success" large
-                @click="onEnrollButtonClicked"
-              >
+
+              <v-btn v-if="this.course.price === '0'" color="success" large @click="onEnrollButtonClicked">
                 <v-icon left v-show="course.isEnrolled">launch</v-icon>
                 {{course.isEnrolled ? 'Start' : 'Enroll'}}
               </v-btn>
+
+              <stripe-checkout v-else button-class="btn btn-primary success btn--large"
+                                stripe-key="pk_test_jLdIeYNmd2dDFMu1gwUpB1n5"
+                                :product="product">
+              </stripe-checkout>
             </v-card-title>
 
             <v-tabs height="60%" fixed-tabs grow>
@@ -225,12 +228,14 @@
   import {mapGetters} from 'vuex';
   import {backendUrl} from '@/config';
   import StarRating from 'vue-star-rating'
+  import { StripeCheckout } from 'vue-stripe'
 
   export default {
     name: 'CourseDetails',
 
     components: {
-      StarRating
+      StarRating,
+      'stripe-checkout': StripeCheckout
     },
 
     data() {
@@ -256,7 +261,16 @@
           return this.course.teacher.first_name + ' ' + this.course.teacher.last_name;
         }
         return '';
-      }
+      },
+
+      product(){
+        return {
+          name: this.course.name,
+          description: this.course.description && this.course.description.substring(0,50),
+          amount: parseInt(this.course.price) * 100,
+          image: this.backendUrl + this.course.image_url
+        }
+      },
     },
 
     watch: {},
@@ -317,6 +331,14 @@
             this.showSnackbar('You have successfully reviewed this course!', 'success', true, true);
           })
           .catch(err => console.log(err))
+      },
+
+      /**
+       * User purchases a course.
+       */
+      onCoursePurchase(evt) {
+        debugger;
+        console.log(evt)
       },
 
       /**
