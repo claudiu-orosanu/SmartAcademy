@@ -28,16 +28,18 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::apiResource('courses', 'CourseController');
-    Route::apiResource('sections', 'SectionController');
-    Route::apiResource('videos', 'VideoController');
-    Route::apiResource('documents', 'DocumentController');
+//    Route::apiResource('sections', 'SectionController');
+//    Route::apiResource('videos', 'VideoController');
+//    Route::apiResource('documents', 'DocumentController');
     
     Route::post('courses/{course}/submitTest', 'CourseController@submitTest');
     Route::post('courses/{course}/enroll', 'CourseController@enroll');
     Route::post('courses/{course}/review', 'CourseController@reviewCourse');
 
-    
-    
+    Route::get('users/{user}', 'UserController@show');
+    Route::post('users/{user}', 'UserController@update');
+    Route::post('changePassword', 'UserController@changePassword');
+
     
     
     

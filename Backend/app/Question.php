@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Question whereText($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Question whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Exam[] $exams
  */
 class Question extends Model
 {

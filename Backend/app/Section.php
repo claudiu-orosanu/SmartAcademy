@@ -30,6 +30,7 @@ class Section extends Model
     protected $fillable =[
         'order_number',
         'name',
+        'description',
         'course_id',
     ];
 

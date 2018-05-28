@@ -135,6 +135,18 @@
                           </v-flex>
                         </v-layout>
 
+                        <!--section description-->
+                        <v-layout row wrap>
+                          <v-flex xs12 class="pl-2">
+                            <v-text-field label="Section description"
+                                          :rules="[(v) => v.length <= 512 || 'Max 512 characters']"
+                                          :counter="512"
+                                          multi-line clearable
+                                          v-model="sectionsDescriptions[n]"
+                            ></v-text-field>
+                          </v-flex>
+                        </v-layout>
+
                         <!--section video-->
                         <v-layout row wrap>
                           <v-flex sm4 lg3>
@@ -239,6 +251,7 @@
 
         sections: 1,
         sectionsNames: [],
+        sectionsDescriptions: [],
         sectionsVideo: [],
         sectionsPdf: [],
         sectionsTests: [],
@@ -257,6 +270,7 @@
       sections (val) {
         if (this.currentSection > val) {
           this.sectionsNames[this.currentSection] = '';
+          this.sectionsDescriptions[this.currentSection] = '';
           this.sectionsPdf[this.currentSection] = '';
           this.sectionsVideo[this.currentSection] = '';
           this.sectionsTests[this.currentSection] = '';
@@ -284,6 +298,7 @@
         for(let i = 1; i <= this.sections; i++) {
           course.sectionsData[i] = {};
           course.sectionsData[i].name = this.sectionsNames[i];
+          course.sectionsData[i].description = this.sectionsDescriptions[i];
           course.sectionsData[i].video = this.sectionsVideo[i];
           course.sectionsData[i].pdf = this.sectionsPdf[i];
           course.sectionsData[i].exam = this.sectionsTests[i];
@@ -431,6 +446,7 @@
 
       for(let i = 1; i <= this.courseSectionsMax; i++) {
         this.sectionsNames[i] = '';
+        this.sectionsDescriptions[i] = '';
         this.sectionsVideo[i] = '';
         this.sectionsPdf[i] = '';
         this.sectionsTests[i] = '';

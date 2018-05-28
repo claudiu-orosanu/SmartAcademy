@@ -19,9 +19,16 @@ use Illuminate\Validation\UnauthorizedException;
 
 class CourseController extends Controller
 {
+    /**
+     * Create a new CourseController instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['index', 'show']]);
+    }
 
-    private $validVideoExtensions = ['mp4', 'mpeg'];
-    private $validDocumentExtensions = ['pdf'];
 
     /**
      * Display a listing of the resource.
@@ -106,6 +113,7 @@ class CourseController extends Controller
             $section = Section::create([
                 'order_number' => $i + 1,
                 'name' => $request->input('sectionNames')[$i],
+                'description' => $request->input('sectionDescriptions')[$i],
                 'course_id' => $course->id,
             ]);
 
@@ -232,13 +240,6 @@ class CourseController extends Controller
     public function enroll(Request $request, Course $course)
     {
         $user = auth()->user();
-
-        // check if user is authenticated
-        if(!$user){
-            return response([
-                'error' => 'Unauthorized.'
-            ], 401);
-        }
 
         // check if user is already enrolled
         if($user->courses->where('id', $course->id)->first()) {

@@ -9,6 +9,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Hash;
 use Mail;
 use Password;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -52,7 +53,7 @@ class AuthController extends Controller
             'first_name' => $firstName,
             'last_name' => $lastName,
             'email' => $email,
-            'password' => bcrypt($password),
+            'password' => Hash::make($password),
             'verify_token' => $verification_code,
         ]);
 

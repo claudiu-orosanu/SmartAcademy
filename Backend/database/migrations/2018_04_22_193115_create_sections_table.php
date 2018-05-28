@@ -17,6 +17,7 @@ class CreateSectionsTable extends Migration
             $table->increments('id');
             $table->integer('order_number');
             $table->string('name');
+            $table->text('description');
 
             $table->integer('course_id')->unsigned()->nullable();
             $table->foreign('course_id')->references('id')->on('courses');

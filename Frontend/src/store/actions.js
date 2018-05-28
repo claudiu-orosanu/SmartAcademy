@@ -120,6 +120,7 @@ export const createCourse = ({commit}, course) => {
 
     for (let i in course.sectionsData) {
       fd.append('sectionNames[]', course.sectionsData[i].name);
+      fd.append('sectionDescriptions[]', course.sectionsData[i].description);
       fd.append('videos[]', course.sectionsData[i].video);
       fd.append('documents[]', course.sectionsData[i].pdf);
       fd.append('exams[]', JSON.stringify(course.sectionsData[i].exam));
@@ -276,6 +277,90 @@ export const reviewCourse = ({commit, state}, payload) => {
       })
       .catch(err => {
         reject(err);
+      });
+  });
+}
+
+/**
+ * Updates current user.
+ *
+ * @param commit
+ * @param user
+ */
+export const updateUser = ({commit}, user) => {
+
+  return new Promise((resolve, reject) => {
+
+    const fd = new FormData();
+    fd.append('first_name', user.firstName);
+    fd.append('last_name', user.lastName);
+    fd.append('about_me', user.aboutMe);
+    fd.append('image', user.image);
+
+    axios.post(`${apiUrl}/users/${user.id}`, fd, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then((response) => {
+        let newUser = response.data;
+        newUser.token = user.token;
+        commit('setCurrentUser', response.data)
+        resolve(response);
+      })
+      .catch(err => {
+        let errors = _.flatten(Object.values(err.response.data.errors));
+        reject(errors);
+      });
+  });
+}
+
+/**
+ * Changes password for current user.
+ *
+ * @param commit
+ * @param payload
+ */
+export const changePassword = ({commit}, payload) => {
+
+  return new Promise((resolve, reject) => {
+
+    axios.post(`${apiUrl}/changePassword`, payload, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch(err => {
+        let errors = [err.response.data.error] || _.flatten(Object.values(err.response.data.errors));
+        reject(errors);
+      });
+  });
+}
+
+/**
+ * Get user.
+ *
+ * @param commit
+ * @param payload
+ */
+export const getUser = ({commit}, userId) => {
+
+  return new Promise((resolve, reject) => {
+
+    axios.get(`${apiUrl}/users/${userId}`, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch(err => {
+        let errors = [err.response.data.error] || _.flatten(Object.values(err.response.data.errors));
+        reject(errors);
       });
   });
 }

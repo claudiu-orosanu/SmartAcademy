@@ -23,19 +23,57 @@
             <v-card-media :src="backendUrl + course.image_url" height="400"></v-card-media>
 
             <v-card-title>
+
+              <!--course name-->
               <div class="display-1">{{course.name}}</div>
+
               <v-spacer></v-spacer>
+
+              <!--social media sharing buttons-->
+              <social-sharing :url="shareUrl" inline-template>
+                <v-speed-dial
+                  v-model="socialMediaButtonFab"
+                  direction="left"
+                  transition="slide-y-reverse-transition"
+                >
+                  <v-btn
+                    slot="activator"
+                    v-model="socialMediaButtonFab"
+                    color="accent" dark small fab
+                  >
+                    <v-icon>share</v-icon>
+                    <v-icon>close</v-icon>
+                  </v-btn>
+                  <network network="facebook">
+                    <v-btn fab dark small color="blue darken-1">
+                      <i class="fab fa-facebook"></i>
+                    </v-btn>
+                  </network>
+                  <network network="googleplus">
+                    <v-btn fab dark small color="red lighten-1">
+                      <i class="fab fa-google-plus"></i>
+                    </v-btn>
+                  </network>
+                  <network network="linkedin">
+                    <v-btn fab dark small color="blue lighten-1">
+                      <i class="fab fa-linkedin"></i>
+                    </v-btn>
+                  </network>
+                </v-speed-dial>
+              </social-sharing>
+
+              <!--course price-->
               <div v-show="!course.isEnrolled" class="title">({{course.price}}$)</div>
 
-              <v-btn v-if="this.course.price === '0'" color="success" large @click="onEnrollButtonClicked">
+              <!--start/enroll/purchase button-->
+              <v-btn v-if="parseInt(this.course.price) === 0" color="success" large @click="onEnrollButtonClicked">
                 <v-icon left v-show="course.isEnrolled">launch</v-icon>
                 {{course.isEnrolled ? 'Start' : 'Enroll'}}
               </v-btn>
 
-              <stripe-checkout v-else button-class="btn btn-primary success btn--large"
-                                stripe-key="pk_test_jLdIeYNmd2dDFMu1gwUpB1n5"
-                                :product="product">
-              </stripe-checkout>
+              <v-btn v-else color="success" large @click="checkout">
+                Purchase
+              </v-btn>
             </v-card-title>
 
             <v-tabs height="60%" fixed-tabs grow>
@@ -77,7 +115,9 @@
                     <v-expansion-panel-content v-for="(section,i) in course.sections" :key="i">
                       <div slot="header">{{section.name}}</div>
                       <v-card>
-                        <v-card-text class="grey lighten-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</v-card-text>
+                        <v-card-text class="grey lighten-3">
+                          <span style="white-space: pre-wrap;">{{section.description}}</span>
+                        </v-card-text>
                       </v-card>
                     </v-expansion-panel-content>
                   </v-expansion-panel>
@@ -88,18 +128,21 @@
                   <v-divider></v-divider>
                   <v-card>
                     <v-card-title>
-                      <v-avatar>
-                        <img src="https://randomuser.me/api/portraits/men/33.jpg" alt="avatar">
-                      </v-avatar>
+                      <avatar
+                        :username="teacherName"
+                        :src="teacherAvatarUrl"
+                        :size="48"
+                        color="#fff"
+                      ></avatar>
                       <span class="title ml-3">
                         {{teacherName}}
                       </span>
                     </v-card-title>
-                    <v-card-text>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    <v-card-text v-show="course.teacher && course.teacher.about_me">
+                      <span style="white-space: pre-wrap;">{{course.teacher && course.teacher.about_me}}</span>
                     </v-card-text>
                     <v-card-actions>
-                      <v-btn flat color="secondary">View Profile</v-btn>
+                      <v-btn flat color="secondary" :to="teacherProfileUrl">View Profile</v-btn>
                     </v-card-actions>
                   </v-card>
                 </v-tab-item>
@@ -121,9 +164,11 @@
                       <v-flex>
                         <v-card flat>
                           <v-card-title>
-                            <v-avatar>
-                              <img src="https://randomuser.me/api/portraits/men/33.jpg" alt="avatar">
-                            </v-avatar>
+                            <avatar
+                              :username="review.user.first_name + ' ' + review.user.last_name"
+                              :src="review.user.image_url ? backendUrl + review.user.image_url : ''"
+                              :size="48"
+                            ></avatar>
                             <span class="title ml-3">
                         {{review.user.first_name}} {{review.user.last_name}}
                       </span>
@@ -146,13 +191,6 @@
                       </v-flex>
                     </v-layout>
                   </v-container>
-
-                  <div>
-                  </div>
-
-
-
-
                 </v-tab-item>
 
                 <!--faq-->
@@ -168,10 +206,6 @@
         </v-flex>
       </v-layout>
 
-      <v-layout row>
-        <v-flex class="text-xs-center mt-3">
-        </v-flex>
-      </v-layout>
     </v-container>
 
     <!--enroll confirmation window-->
@@ -227,15 +261,15 @@
 <script>
   import {mapGetters} from 'vuex';
   import {backendUrl} from '@/config';
-  import StarRating from 'vue-star-rating'
-  import { StripeCheckout } from 'vue-stripe'
+  import StarRating from 'vue-star-rating';
+  import Avatar from 'vue-avatar';
 
   export default {
     name: 'CourseDetails',
 
     components: {
       StarRating,
-      'stripe-checkout': StripeCheckout
+      Avatar
     },
 
     data() {
@@ -248,6 +282,8 @@
         reviewText: '',
         reviewScore: 0,
 
+        socialMediaButtonFab: false,
+
       }
     },
 
@@ -256,21 +292,25 @@
         course: 'selectedCourse',
         isAuthenticated: 'isAuthenticated'
       }),
-      teacherName(){
-        if(this.course.teacher) {
+      teacherName() {
+        if (this.course.teacher) {
           return this.course.teacher.first_name + ' ' + this.course.teacher.last_name;
         }
         return '';
       },
-
-      product(){
-        return {
-          name: this.course.name,
-          description: this.course.description && this.course.description.substring(0,50),
-          amount: parseInt(this.course.price) * 100,
-          image: this.backendUrl + this.course.image_url
+      teacherAvatarUrl() {
+        if (this.course.teacher) {
+          return this.course.teacher.image_url ? backendUrl + this.course.teacher.image_url : '';
         }
       },
+      teacherProfileUrl() {
+        if (this.course.teacher) {
+          return '/users/' + this.course.teacher.id;
+        }
+      },
+      shareUrl() {
+        return 'localhost:9999' + this.$router.currentRoute.fullPath;
+      }
     },
 
     watch: {},
@@ -289,13 +329,13 @@
       /**
        * User clicks Enroll button -> opens enrollment window.
        */
-      onEnrollButtonClicked(){
-        if(!this.isAuthenticated) {
+      onEnrollButtonClicked() {
+        if (!this.isAuthenticated) {
           this.$router.push('/login');
           return;
         }
 
-        if(this.course.isEnrolled) {
+        if (this.course.isEnrolled) {
           this.$router.push('/courses/' + this.course.id);
           return;
         }
@@ -336,9 +376,18 @@
       /**
        * User purchases a course.
        */
-      onCoursePurchase(evt) {
-        debugger;
-        console.log(evt)
+      checkout() {
+        this.$checkout.open({
+          name: this.course.name,
+          description: this.course.description && this.course.description.substring(0, 50),
+          currency: 'USD',
+          amount: parseInt(this.course.price) * 100,
+          image: this.backendUrl + this.course.image_url,
+          token: (token) => {
+            console.log(token);
+            this.token = token;
+          }
+        });
       },
 
       /**

@@ -17,6 +17,7 @@ class SectionResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'description' => $this->description,
             'order_number' => $this->order_number,
             $this->mergeWhen(auth()->check(), [
                 'videos' => VideoResource::collection($this->videos),

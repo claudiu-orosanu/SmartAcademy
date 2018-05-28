@@ -34,6 +34,8 @@ use Zizaco\Entrust\Traits\EntrustUserTrait;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereVerifyToken($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Course[] $courses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Course[] $reviewedCourses
  */
 class User extends Authenticatable implements JWTSubject
 {
@@ -45,7 +47,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'first_name', 'last_name', 'email', 'password', 'is_verified', 'verify_token'
+        'first_name', 'last_name', 'email', 'password', 'is_verified', 'verify_token', 'about_me', 'image_url'
     ];
 
     /**

@@ -5,6 +5,7 @@ import Vuetify from 'vuetify'
 import App from './App'
 import store from './store'
 import router from './router'
+import VueStripeCheckout from 'vue-stripe-checkout';
 
 import colors from 'vuetify/es5/util/colors'
 
@@ -25,6 +26,20 @@ Vue.use(Vuetify, {
     success: colors.green.base
   }
 })
+
+// initialize stripe component
+Vue.use(VueStripeCheckout, {
+  key: 'pk_test_jLdIeYNmd2dDFMu1gwUpB1n5',
+  locale: 'auto',
+  currency: 'USD',
+  billingAddress: true,
+  panelLabel: 'Pay {{amount}}'
+});
+
+// social media sharing widgets
+let SocialSharing = require('vue-social-sharing');
+Vue.use(SocialSharing);
+
 
 Vue.config.productionTip = false
 

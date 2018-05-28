@@ -8,6 +8,8 @@ import Login from '../components/auth/Login'
 import Register from '../components/auth/Register'
 import RecoverPassword from '../components/auth/RecoverPassword'
 import ResetPassword from '../components/auth/ResetPassword'
+import MyProfile from '../components/user/MyProfile'
+import Profile from '../components/user/Profile'
 
 Vue.use(Router)
 
@@ -59,6 +61,16 @@ const router = new Router({
       path: '/courses/:id/details',
       name: 'CourseDetails',
       component: CourseDetails
+    },
+    {
+      path: '/myProfile',
+      name: 'MyProfile',
+      component: MyProfile
+    },
+    {
+      path: '/users/:id',
+      name: 'Profile',
+      component: Profile
     }
   ]
 })

@@ -29,6 +29,12 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Course whereImageUrl($value)
  * @property string|null $image_url
  * @property-read \App\Exam $exams
+ * @property int|null $teacher_id
+ * @property-read \App\Exam $exam
+ * @property-read \App\User|null $teacher
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\User[] $users
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\User[] $usersThatReviewed
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Course whereTeacherId($value)
  */
 class Course extends Model
 {

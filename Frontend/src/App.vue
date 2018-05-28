@@ -9,7 +9,10 @@
         <v-list class="pa-0">
           <v-list-tile avatar>
             <v-list-tile-avatar>
-              <img :src="'https://ui-avatars.com/api/?name=' + currentUser.first_name + '+' + currentUser.last_name">
+              <avatar :username="fullUserName"
+                      :src="avatarUrl"
+                      :size="45"
+                      color="#fff"/>
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>{{currentUser.first_name}} {{currentUser.last_name}}</v-list-tile-title>
@@ -73,7 +76,7 @@
               {{currentUser.name}}
             </v-btn>
             <v-list>
-              <v-list-tile>
+              <v-list-tile to="/myProfile">
                 <v-list-tile-action><v-icon>account_circle</v-icon></v-list-tile-action>
                 <v-list-tile-title>My Profile</v-list-tile-title>
               </v-list-tile>
@@ -126,10 +129,16 @@
 </template>
 
 <script>
+  import {apiUrl, backendUrl} from '@/config';
   import { mapGetters } from 'vuex';
+  import Avatar from 'vue-avatar';
 
   export default {
     name: 'App',
+
+    components: {
+      Avatar
+    },
 
     data () {
       return {
@@ -143,7 +152,15 @@
         'currentUser',
         'isAuthenticated',
         'snackBar'
-      ])
+      ]),
+      fullUserName(){
+        return this.currentUser.first_name + ' ' + this.currentUser.last_name;
+      },
+      avatarUrl() {
+        if (this.currentUser) {
+          return this.currentUser.image_url ? backendUrl + this.currentUser.image_url : '';
+        }
+      }
     },
 
     methods: {

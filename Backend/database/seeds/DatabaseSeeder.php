@@ -3,6 +3,7 @@
 use App\Role;
 use App\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -43,7 +44,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'Admin',
             'last_name' => 'Global',
             'email' => 'admin@gmail.com',
-            'password' => bcrypt('admin'),
+            'password' => Hash::make('admin'),
             'is_verified' => true,
             'remember_token' => str_random(10)
         ]);
