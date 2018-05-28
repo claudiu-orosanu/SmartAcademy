@@ -14,8 +14,8 @@ use App\Section;
 use App\User;
 use App\Video;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\UnauthorizedException;
 
 class CourseController extends Controller
 {
@@ -75,9 +75,12 @@ class CourseController extends Controller
     {
         $user = auth()->user();
 
-        // is user authenticated?
-
         // is user teacher?
+        if($user->hasRole('student')) {
+            return response([
+                'error' => 'Only teachers can create courses.'
+            ], 400);
+        }
 
         // validate request
         $maxSize = (int)ini_get('upload_max_filesize') * 1000;
@@ -125,6 +128,12 @@ class CourseController extends Controller
 
         $this->createFinalExam($course);
 
+        // automatically enroll teacher in course
+        DB::table('enrollments')->insert([
+            'user_id' => $user->id,
+            'course_id' => $course->id
+        ]);
+
         return response($course);
     }
 
@@ -171,6 +180,8 @@ class CourseController extends Controller
      */
     public function submitTest(Request $request, Course $course)
     {
+        $user = auth()->user();
+        $examId = $request->input('examId');
         $sectionNumber = (int) $request->query('sectionNumber');
         $isFinalExam = $sectionNumber === 0;
 
@@ -193,29 +204,8 @@ class CourseController extends Controller
             ], 400);
         }
 
-        $testResults = [];
-
         // check answers
-        foreach ($questions as $index => $question) {
-            $correctAnswer = $question->answers->where('is_correct', true)->first();
-
-            if($testData[$question->id] == $correctAnswer->order_number) {
-
-                $testResults[$question->id] = [
-                    'correct' => true,
-                ];
-            }
-            else {
-                $testResults[$question->id] = [
-                    'correct' => false,
-                ];
-            }
-
-            if($isFinalExam){
-                $relatedSection = $question->exams->where('section_id','<>','')->first()->section;
-                $testResults[$question->id]['relatedSection'] = $relatedSection;
-            }
-        }
+        $testResults = $this->checkAndStoreAnswers($questions, $testData, $user, $examId, $isFinalExam);
 
         $correctAnswers = array_reduce($testResults, function ($carry, $answer) {
             if($answer['correct']) {
@@ -225,6 +215,14 @@ class CourseController extends Controller
         });
         $score = round($correctAnswers / count($testData), 2);
 
+        if($isFinalExam){
+            DB::table('enrollments')->update([
+                'user_id' => $user->id,
+                'course_id' => $course->id,
+                'grade' => $score
+            ]);
+        }
+
         return response([
             'testResults' => $testResults,
             'score' => $score
@@ -232,12 +230,62 @@ class CourseController extends Controller
     }
 
     /**
+     * Check user answers and store them in database
+     *
+     * @param $questions
+     * @param $testData
+     * @param $user
+     * @param $examId
+     * @param $isFinalExam
+     * @return mixed
+     */
+    private function checkAndStoreAnswers($questions, $testData, $user, $examId, $isFinalExam)
+    {
+        $testResults = [];
+
+        foreach ($questions as $index => $question) {
+            $answer = $question->answers->find($testData[$question->id]);
+
+            $testResults[$question->id] = [
+                'correct' => $answer->is_correct,
+            ];
+
+            $query = DB::table('exam_results')
+                ->where('user_id', $user->id)
+                ->where('exam_id', $examId)
+                ->where('question_id', $question->id);
+
+            $storedResult = $query->get();
+
+            $resultToStore = [
+                'user_id' => $user->id,
+                'exam_id' => $examId,
+                'question_id' => $question->id,
+                'answer_id' => $answer->id,
+            ];
+
+            // store answers for user
+            if ($storedResult->isNotEmpty()) {
+                $query->update($resultToStore);
+            } else {
+                DB::table('exam_results')->insert($resultToStore);
+            }
+
+            if ($isFinalExam) {
+                $relatedSection = $question->exams->where('section_id', '<>', '')->first()->section;
+                $testResults[$question->id]['relatedSection'] = $relatedSection;
+            }
+        }
+        return $testResults;
+    }
+
+    /**
      * Handles course enrollment.
      *
-     * @param  \App\Course  $course
+     * @param  \App\Course $course
      * @return \Illuminate\Http\Response
      */
-    public function enroll(Request $request, Course $course)
+    public function enroll(Course $course)
     {
         $user = auth()->user();
 
@@ -249,7 +297,6 @@ class CourseController extends Controller
         }
 
         $user->courses()->attach($course->id, [
-            'is_completed' => false,
             'created_at' => new \DateTime(),
             'updated_at' => new \DateTime(),
         ]);
@@ -262,18 +309,18 @@ class CourseController extends Controller
     /**
      * Handles course review.
      *
-     * @param  \App\Course  $course
+     * @param Request $request
+     * @param  \App\Course $course
      * @return \Illuminate\Http\Response
      */
     public function reviewCourse(Request $request, Course $course)
     {
         $user = auth()->user();
 
-        // check if user is authenticated
-        if(!$user){
+        if($course->teacher_id === $user->id){
             return response([
-                'error' => 'Unauthorized.'
-            ], 401);
+                'error' => 'You cannot review your own course.'
+            ], 400);
         }
 
         // check if user has already reviewed

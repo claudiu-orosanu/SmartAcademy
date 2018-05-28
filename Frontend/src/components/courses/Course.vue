@@ -78,7 +78,7 @@
                       <v-radio-group v-model="testData[question.id]">
                         <v-radio v-for="answer in exam.questions[index].answers" :key="answer.text"
                                  :label="answer.text"
-                                 :value="answer.order_number"
+                                 :value="answer.id"
                                  :color="answerColor(question.id)"
                                  class="mb-1 ml-3"
                         ></v-radio>
@@ -143,7 +143,7 @@
                 <v-radio-group v-model="testData[question.id]">
                   <v-radio v-for="answer in exam.questions[index].answers" :key="answer.text"
                            :label="answer.text"
-                           :value="answer.order_number"
+                           :value="answer.id"
                            :color="answerColor(question.id)"
                            class="mb-1 ml-3"
                   ></v-radio>
@@ -251,10 +251,12 @@
 
       testResultsText() {
         let text;
+
         if (this.score >= 0.5) {
-          text = 'Congratulations! You passed this test!';
-        } else {
-          text = 'Unfortunately, you did not pass the test. Study more and try again!';
+          text = this.isFinalExam ? 'Congratulations! You graduated this course!' : 'Congratulations! You passed this test!';
+        }
+        else {
+          text = this.isFinalExam ? 'Unfortunately, you did not pass the final exam. Study more and try again!' : 'Unfortunately, you did not pass the test. Study more and try again!';
         }
 
         text += ' (Your score: ' + this.score * 100 + ').';
@@ -354,6 +356,7 @@
         this.loadingResults = true;
 
         let payload = {
+          examId: this.exam.id,
           sectionNumber: this.activeSection + 1,
           courseId: this.$route.params.id,
           testData: this.testData

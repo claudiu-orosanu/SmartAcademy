@@ -226,6 +226,7 @@ export const submitTest = ({commit}, payload) => {
   return new Promise((resolve, reject) => {
     axios.post(`${apiUrl}/courses/${payload.courseId}/submitTest`, payload.testData, {
       params: {
+        examId: payload.examId,
         sectionNumber: payload.sectionNumber,
         XDEBUG_SESSION_START: 'PHPSTORM'
       }

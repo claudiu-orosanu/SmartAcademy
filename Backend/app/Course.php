@@ -83,7 +83,7 @@ class Course extends Model
     public function users()
     {
         return $this->belongsToMany('App\User', 'enrollments', 'course_id', 'user_id')
-            ->withPivot('is_completed')
+            ->withPivot('grade')
             ->withTimestamps();
     }
 

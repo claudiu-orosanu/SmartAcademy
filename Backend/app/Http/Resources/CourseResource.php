@@ -16,12 +16,22 @@ class CourseResource extends JsonResource
     public function toArray($request)
     {
         $user = auth()->user();
-        $isEnrolled = $user ? !!$this->users->where('id', $user->id)->first() : false;
+
+        $isEnrolled = false;
+        $userGrade = null;
+        if($user){
+            $enrollment = $this->users->where('id', $user->id)->first();
+            if($enrollment) {
+                $isEnrolled = true;
+                $userGrade = $enrollment->pivot->grade;
+            }
+        }
         $isReviewedByUser = false;
 
         $finalExamQuestions = $this->exam->questions->all();
         shuffle($finalExamQuestions);
         $finalExam = [];
+        $finalExam['id'] = $this->exam->id;
         foreach ($finalExamQuestions as $finalExamQuestion) {
             $finalExam['questions'][] = new QuestionResource($finalExamQuestion);
         }
@@ -52,6 +62,7 @@ class CourseResource extends JsonResource
             'image_url' => $this->image_url,
             'teacher' => new UserResource($this->teacher),
             'isEnrolled' => $isEnrolled,
+            'userGrade' => $userGrade,
             'isReviewedByUser' => $isReviewedByUser,
             'reviews' => $reviews,
             'finalExam' => $finalExam,

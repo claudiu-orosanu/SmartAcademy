@@ -23,8 +23,7 @@ class CreateEnrollmentsTable extends Migration
 
             $table->primary(['user_id', 'course_id']);
 
-            $table->boolean('is_completed');
-            $table->integer('grade')->nullable();
+            $table->double('grade')->nullable();
 
             $table->timestamps();
         });
