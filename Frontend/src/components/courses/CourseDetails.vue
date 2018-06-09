@@ -168,6 +168,7 @@
                               :username="review.user.first_name + ' ' + review.user.last_name"
                               :src="review.user.image_url ? backendUrl + review.user.image_url : ''"
                               :size="48"
+                              color="#fff"
                             ></avatar>
                             <span class="title ml-3">
                         {{review.user.first_name}} {{review.user.last_name}}

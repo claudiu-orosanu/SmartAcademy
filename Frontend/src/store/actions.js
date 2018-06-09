@@ -366,5 +366,29 @@ export const getUser = ({commit}, userId) => {
   });
 }
 
+/**
+ * Get dashboard data.
+ *
+ * @param commit
+ * @param payload
+ */
+export const getDashboardData = ({commit}) => {
+
+  return new Promise((resolve, reject) => {
+
+    axios.get(`${apiUrl}/dashboard`, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  });
+}
+
 
 

@@ -40,6 +40,8 @@ Route::prefix('v1')->group(function () {
     Route::post('users/{user}', 'UserController@update');
     Route::post('changePassword', 'UserController@changePassword');
 
+    Route::get('dashboard', 'DashboardController@getDashboardData');
+
     
     
     

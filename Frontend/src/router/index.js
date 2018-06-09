@@ -10,6 +10,7 @@ import RecoverPassword from '../components/auth/RecoverPassword'
 import ResetPassword from '../components/auth/ResetPassword'
 import MyProfile from '../components/user/MyProfile'
 import Profile from '../components/user/Profile'
+import Dashboard from '../components/Dashboard'
 
 Vue.use(Router)
 
@@ -71,6 +72,11 @@ const router = new Router({
       path: '/users/:id',
       name: 'Profile',
       component: Profile
+    },
+    {
+      path: '/',
+      name: 'Dashboard',
+      component: Dashboard
     }
   ]
 })

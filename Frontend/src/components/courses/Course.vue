@@ -35,8 +35,8 @@
 
         <div v-show="!loading">
           <!--video lecture-->
-          <v-tab-item class="grey">
-            <v-container style="width: 670px" class="mt-4">
+          <v-tab-item>
+            <v-container style="width: 935px" class="mt-4">
               <video-player class="vjs-custom-skin"
                             ref="videoPlayer"
                             :options="playerOptions"
@@ -226,7 +226,7 @@
 
         // videojs options
         playerOptions: {
-          height: '360',
+          height: '510',
           autoplay: false,
           muted: true,
           language: 'en',

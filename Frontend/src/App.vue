@@ -23,6 +23,16 @@
 
       <v-list>
 
+        <v-divider></v-divider>
+        <v-list-tile to="/">
+          <v-list-tile-action>
+            <v-icon>dashboard</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Dashboard</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
         <!--Courses-->
         <v-list-group
           value="true"
@@ -35,26 +45,26 @@
               <v-list-tile-title>Courses</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
-          <router-link to="/courses" tag="v-list-tile">
+          <v-list-tile to="/courses" exact>
             <v-list-tile-content class="ml-4">
               <v-list-tile-title>Explore</v-list-tile-title>
             </v-list-tile-content>
-          </router-link>
-          <router-link v-if="isAuthenticated" to="/courses/create" tag="v-list-tile">
+          </v-list-tile>
+          <v-list-tile v-if="isAuthenticated" to="/courses/create" exact>
             <v-list-tile-content class="ml-4">
               <v-list-tile-title>Create</v-list-tile-title>
             </v-list-tile-content>
-          </router-link>
+          </v-list-tile>
         </v-list-group>
 
-        <router-link to="/teachers" tag="v-list-tile">
+        <v-list-tile to="/teachers">
           <v-list-tile-action>
             <v-icon>face</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Teachers</v-list-tile-title>
           </v-list-tile-content>
-        </router-link>
+        </v-list-tile>
 
       </v-list>
     </v-navigation-drawer>
