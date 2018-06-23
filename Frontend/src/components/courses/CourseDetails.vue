@@ -63,7 +63,7 @@
               </social-sharing>
 
               <!--course price-->
-              <div v-show="!course.isEnrolled" class="title">({{course.price}}$)</div>
+              <div v-show="!course.isEnrolled" class="title">({{parseInt(course.price) ? course.price + '$' : 'FREE'}})</div>
 
               <!--start/enroll/purchase button-->
               <v-btn v-if="parseInt(this.course.price) === 0" color="success" large @click="onEnrollButtonClicked">
@@ -92,10 +92,6 @@
               <v-tab>
                 <v-icon class="pr-2" medium color="primary">grade</v-icon>
                 Reviews
-              </v-tab>
-              <v-tab>
-                <v-icon class="pr-2" medium color="primary">help</v-icon>
-                FAQ
               </v-tab>
 
               <v-tabs-items>
@@ -179,7 +175,7 @@
                               :increment="0.5"
                               :star-size="30"
                               :glow="3"
-                              :rating="parseInt(review.score)"
+                              :rating="parseFloat(review.score)"
                               read-only
                             ></star-rating>
                           </v-card-text>

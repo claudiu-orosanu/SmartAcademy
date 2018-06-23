@@ -35,7 +35,7 @@
 
         <div v-show="!loading">
           <!--video lecture-->
-          <v-tab-item>
+          <v-tab-item style="overflow-x: auto">
             <v-container style="width: 935px" class="mt-4">
               <video-player class="vjs-custom-skin"
                             ref="videoPlayer"

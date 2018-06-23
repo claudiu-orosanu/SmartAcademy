@@ -46,17 +46,13 @@ const router = new Router({
       path: '/courses/create',
       name: 'CreateCourse',
       component: CreateCourse,
-      meta: {
-        requiresAuth: true
-      }
+      meta: { requiresAuth: true }
     },
     {
       path: '/courses/:id',
       name: 'Course',
       component: Course,
-      meta: {
-        requiresAuth: true
-      }
+      meta: { requiresAuth: true }
     },
     {
       path: '/courses/:id/details',
@@ -66,17 +62,20 @@ const router = new Router({
     {
       path: '/myProfile',
       name: 'MyProfile',
-      component: MyProfile
+      component: MyProfile,
+      meta: { requiresAuth: true }
     },
     {
       path: '/users/:id',
       name: 'Profile',
-      component: Profile
+      component: Profile,
+      meta: { requiresAuth: true }
     },
     {
-      path: '/',
+      path: '/dashboard',
       name: 'Dashboard',
-      component: Dashboard
+      component: Dashboard,
+      meta: { requiresAuth: true }
     }
   ]
 })

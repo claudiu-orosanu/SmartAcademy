@@ -61,8 +61,8 @@
                 <v-text-field
                   name="description"
                   label="Description"
-                  :rules="[(v) => v.length <= 255 || 'Max 255 characters']"
-                  :counter="255"
+                  :rules="[(v) => v.length <= 2048 || 'Max 2048 characters']"
+                  :counter="2048"
                   v-model="description"
                   textarea clearable
                   required

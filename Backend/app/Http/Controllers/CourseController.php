@@ -86,8 +86,8 @@ class CourseController extends Controller
         $maxSize = (int)ini_get('upload_max_filesize') * 1000;
 
         $this->validate($request, [
-            'name' => 'required|min:3|max:50',
-            'description' => 'required|min:3|max:255',
+            'name' => 'required|min:3|max:128',
+            'description' => 'required|min:3|max:2048',
             'category' => 'required',
             'price' => 'required',
             'image' => 'required|file|image|max:' . $maxSize
@@ -216,11 +216,25 @@ class CourseController extends Controller
         $score = round($correctAnswers / count($testData), 2);
 
         if($isFinalExam){
-            DB::table('enrollments')->update([
+
+            $query = DB::table('enrollments')
+                ->where('user_id', $user->id)
+                ->where('course_id', $course->id);
+
+            $existingEnrollment = $query->get();
+
+            $enrollment = [
                 'user_id' => $user->id,
                 'course_id' => $course->id,
                 'grade' => $score
-            ]);
+            ];
+
+            // store answers for user
+            if ($existingEnrollment->isNotEmpty()) {
+                $query->update($enrollment);
+            } else {
+                DB::table('exam_results')->insert($enrollment);
+            }
         }
 
         return response([
