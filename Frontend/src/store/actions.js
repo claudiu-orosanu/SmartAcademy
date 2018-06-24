@@ -147,7 +147,11 @@ export const createCourse = ({commit}, course) => {
  */
 export const login = ({commit}, credentials) => {
   return new Promise((resolve, reject) => {
-    axios.post(`${apiUrl}/auth/login`, credentials)
+    axios.post(`${apiUrl}/auth/login`, credentials, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
       .then(response => {
 
         let user = Object.assign({}, response.data.user, {
@@ -171,7 +175,11 @@ export const login = ({commit}, credentials) => {
 
 export const register = ({commit}, credentials) => {
   return new Promise((resolve, reject) => {
-    axios.post(`${apiUrl}/auth/register`, credentials)
+    axios.post(`${apiUrl}/auth/register`, credentials, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
       .then(response => {
         resolve(response);
       })
@@ -377,6 +385,85 @@ export const getDashboardData = ({commit}) => {
   return new Promise((resolve, reject) => {
 
     axios.get(`${apiUrl}/dashboard`, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  });
+}
+
+
+/**
+ * Get teachers.
+ *
+ * @param commit
+ * @param payload
+ */
+export const getTeachers = ({commit}) => {
+
+  return new Promise((resolve, reject) => {
+
+    axios.get(`${apiUrl}/getUnverifiedTeachers`, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  });
+}
+
+
+/**
+ * Accept teacher.
+ *
+ * @param commit
+ * @param payload
+ */
+export const acceptTeacher = ({commit}, teacherId) => {
+
+  return new Promise((resolve, reject) => {
+
+    axios.post(`${apiUrl}/acceptTeacher`, {
+      teacherId: teacherId
+    },{
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  });
+}
+
+
+/**
+ * Decline teacher.
+ *
+ * @param commit
+ * @param payload
+ */
+export const declineTeacher = ({commit}, teacherId) => {
+
+  return new Promise((resolve, reject) => {
+
+    axios.post(`${apiUrl}/declineTeacher`, {
+      teacherId: teacherId
+    },{
       params: {
         XDEBUG_SESSION_START: 'PHPSTORM'
       }

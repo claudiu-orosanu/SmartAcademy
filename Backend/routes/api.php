@@ -37,8 +37,13 @@ Route::prefix('v1')->group(function () {
     Route::post('courses/{course}/review', 'CourseController@reviewCourse');
 
     Route::get('users/{user}', 'UserController@show');
+    Route::get('users', 'UserController@index');
     Route::post('users/{user}', 'UserController@update');
     Route::post('changePassword', 'UserController@changePassword');
+
+    Route::get('getUnverifiedTeachers', 'UserController@getUnverifiedTeachers');
+    Route::post('acceptTeacher', 'UserController@acceptTeacher');
+    Route::post('declineTeacher', 'UserController@declineTeacher');
 
     Route::get('dashboard', 'DashboardController@getDashboardData');
 

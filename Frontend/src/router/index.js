@@ -6,11 +6,13 @@ import CourseDetails from '../components/courses/CourseDetails'
 import CreateCourse from '../components/courses/CreateCourse/CreateCourse'
 import Login from '../components/auth/Login'
 import Register from '../components/auth/Register'
+import TeacherRegister from '../components/auth/TeacherRegister'
 import RecoverPassword from '../components/auth/RecoverPassword'
 import ResetPassword from '../components/auth/ResetPassword'
 import MyProfile from '../components/user/MyProfile'
 import Profile from '../components/user/Profile'
 import Dashboard from '../components/Dashboard'
+import Teachers from '../components/Teachers'
 
 Vue.use(Router)
 
@@ -26,6 +28,11 @@ const router = new Router({
       path: '/register',
       name: 'Register',
       component: Register
+    },
+    {
+      path: '/registerTeacher',
+      name: 'TeacherRegister',
+      component: TeacherRegister
     },
     {
       path: '/recoverPassword',
@@ -75,6 +82,12 @@ const router = new Router({
       path: '/dashboard',
       name: 'Dashboard',
       component: Dashboard,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/teachers',
+      name: 'Teachers',
+      component: Teachers,
       meta: { requiresAuth: true }
     }
   ]

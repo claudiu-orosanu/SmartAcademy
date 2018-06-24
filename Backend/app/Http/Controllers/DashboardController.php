@@ -36,9 +36,14 @@ class DashboardController extends Controller
         $mostPopularCourses = [];
 
         foreach ($allCourses as $course) {
+
+            $students = $course->users->filter(function ($user) {
+                return $user->hasRole('student');
+            });
+
             $mostPopularCourses[] = [
                 'course' => $course,
-                'students' => count($course->users)
+                'students' => count($students)
             ];
         }
 

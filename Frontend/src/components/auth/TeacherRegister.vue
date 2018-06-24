@@ -48,9 +48,19 @@
                             :rules="passwordRules"
                             @keyup.enter="register"
               ></v-text-field>
-            </v-form>
 
-            <a class="accent--text body-1" @click.stop="goToTeacherRegistration">Are you a teacher?</a>
+              <v-text-field
+                name="qualifications"
+                label="Tell us what qualifies you as a teacher"
+                :rules="[(v) => v.length <= 4096 || 'Max 4096 characters']"
+                :counter="4096"
+                v-model="qualifications"
+                textarea clearable
+                required
+                @keyup.enter="register"
+              ></v-text-field>
+
+            </v-form>
 
             <!--errors-->
             <v-layout v-if="this.errors.length" row class="mt-4">
@@ -80,7 +90,7 @@
   import {apiUrl, backendUrl} from '@/config';
 
   export default {
-    name: 'Register',
+    name: 'TeacherRegister',
 
     data() {
       return {
@@ -89,6 +99,7 @@
         email: '',
         password: '',
         passwordRepeat: '',
+        qualifications: '',
         errors: [],
         formIsValid: false,
         nameRules: [
@@ -123,7 +134,8 @@
           firstName: this.firstName,
           lastName: this.lastName,
           email: this.email,
-          password: this.password
+          password: this.password,
+          qualifications: this.qualifications
         }
 
         this.$store.dispatch('register', credentials)
@@ -137,10 +149,6 @@
           .catch(err => {
             this.errors = err;
           });
-      },
-
-      goToTeacherRegistration() {
-        this.$router.push('/registerTeacher');
       }
     },
   }

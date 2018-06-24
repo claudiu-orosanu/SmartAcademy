@@ -48,6 +48,8 @@ class AuthController extends Controller
         $password = $request->input('password');
         $verification_code = str_random(30);
 
+        $qualifications = $request->input('qualifications');
+
         // create user
         $user = User::create([
             'first_name' => $firstName,
@@ -55,10 +57,15 @@ class AuthController extends Controller
             'email' => $email,
             'password' => Hash::make($password),
             'verify_token' => $verification_code,
+            'qualifications' => $qualifications,
         ]);
 
-        // assign 'student' role to new user
-        $user->attachRole(Role::whereName('student')->first());
+        // assign role to new user
+        if ($qualifications) {
+            $user->attachRole(Role::whereName('teacher')->first());
+        } else {
+            $user->attachRole(Role::whereName('student')->first());
+        }
 
         // send verification mail
         $user->notify(new UserRegistered($user));
@@ -200,11 +207,37 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->roles->first()->name === 'student') {
+            $user->update([
+                'is_verified' => 1,
+                'verify_token' => null,
+            ]);
+        }
+
+        return redirect(getenv('APP_URL') . '/login');
+    }
+
+    /**
+     * Verifies teacher.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function verifyTeacher(User $user)
+    {
+
+        if ($user->is_verified == 1) {
+            return response([
+                'message' => 'Account already verified.'
+            ]);
+        }
+
         $user->update([
             'is_verified' => 1,
             'verify_token' => null,
         ]);
 
-        return redirect(getenv('APP_URL') . '/login');
+        return response()->json([
+            'success' => true, 'data' => ['message' => 'Teacher has been accepted.']
+        ]);
     }
 }

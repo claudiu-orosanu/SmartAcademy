@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\UserResource;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,7 +29,20 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        $role = $request->query('role');
 
+        if($role) {
+            $role_users = DB::table('role_user')->where('role_id', '=', 2)->get();
+            $userIds = $role_users->pluck('user_id');
+            $users = User::whereIn('id', $userIds)->get();
+        }
+        else {
+            $users = User::all();
+        }
+
+        return response([
+            'users' => $users
+        ]);
     }
 
     /**
@@ -144,6 +158,84 @@ class UserController extends Controller
 
         return response([
             'message' => 'Password updated.'
+        ]);
+    }
+
+    public function getUnverifiedTeachers(Request $request)
+    {
+        $authUser = auth()->user();
+
+        // is user admin?
+        if(!$authUser->hasRole('admin')) {
+            return response([
+                'error' => 'Only admin can see unverified teachers!'
+            ], 400);
+        }
+
+        $teachers = User::where('verify_token', '!=', null)->get();
+
+        return response([
+            'teachers' => $teachers
+        ]);
+    }
+
+    public function acceptTeacher(Request $request)
+    {
+        $authUser = auth()->user();
+
+        // is user admin?
+        if(!$authUser->hasRole('admin')) {
+            return response([
+                'error' => 'Only admin can accept teachers!'
+            ], 400);
+        }
+
+        $teacherId = $request->input('teacherId');
+
+        $teacher = User::find($teacherId);
+        if(!$teacher) {
+            return response([
+                'error' => 'Teacher not found!'
+            ], 404);
+        }
+
+        $teacher->update([
+            'is_verified' => true,
+            'verify_token' => null,
+        ]);
+
+        return response([
+            'message' => 'Teacher accepted.'
+        ]);
+    }
+
+    public function declineTeacher(Request $request)
+    {
+        $authUser = auth()->user();
+
+        // is user admin?
+        if(!$authUser->hasRole('admin')) {
+            return response([
+                'error' => 'Only admin can accept teachers!'
+            ], 400);
+        }
+
+        $teacherId = $request->input('teacherId');
+
+        $teacher = User::find($teacherId);
+        if(!$teacher) {
+            return response([
+                'error' => 'Teacher not found!'
+            ], 404);
+        }
+
+        $teacher->update([
+            'is_verified' => false,
+            'verify_token' => null,
+        ]);
+
+        return response([
+            'message' => 'Teacher declined.'
         ]);
     }
 }
