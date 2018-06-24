@@ -62,7 +62,19 @@ class CourseController extends Controller
                 $request->query('page'));
 
         return new CourseCollection($paginatedCourses);
+    }
 
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @param Request $request
+     * @return CourseCollection
+     */
+    public function myCourses(Request $request)
+    {
+        $courses = auth()->user()->courses;
+        return new CourseCollection($courses);
     }
 
     /**

@@ -19,7 +19,8 @@ export const getPaginatedCourses = ({commit, state}, payload) => {
         page: payload.page,
         itemsPerPage: payload.itemsPerPage,
         search: payload.searchTerm,
-        categories: payload.categories
+        categories: payload.categories,
+        XDEBUG_SESSION_START: 'PHPSTORM'
       }
     })
       .then(response => {
@@ -42,8 +43,32 @@ export const getPaginatedCourses = ({commit, state}, payload) => {
         reject(err);
       })
   });
+}
 
+/**
+ * Call api backend and get courses.
+ *
+ * @param commit
+ * @param state
+ * @param payload
+ */
+export const getMyCourses = ({commit, state}, payload) => {
 
+  return new Promise((resolve, reject) => {
+
+    // make api call to get the paginated courses
+    axios.get(`${apiUrl}/myCourses`, {
+      params: {
+        XDEBUG_SESSION_START: 'PHPSTORM'
+      }
+    })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(err => {
+        reject(err);
+      })
+  });
 }
 
 /**

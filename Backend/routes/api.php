@@ -46,6 +46,7 @@ Route::prefix('v1')->group(function () {
     Route::post('declineTeacher', 'UserController@declineTeacher');
 
     Route::get('dashboard', 'DashboardController@getDashboardData');
+    Route::get('myCourses', 'CourseController@myCourses');
 
     
     

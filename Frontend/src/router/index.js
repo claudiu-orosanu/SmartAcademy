@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Courses from '../components/courses/Courses'
+import MyCourses from '../components/courses/MyCourses'
 import Course from '../components/courses/Course'
 import CourseDetails from '../components/courses/CourseDetails'
 import CreateCourse from '../components/courses/CreateCourse/CreateCourse'
@@ -48,6 +49,11 @@ const router = new Router({
       path: '/courses',
       name: 'Courses',
       component: Courses
+    },
+    {
+      path: '/myCourses',
+      name: 'MyCourses',
+      component: MyCourses
     },
     {
       path: '/courses/create',

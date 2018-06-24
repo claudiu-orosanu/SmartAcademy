@@ -50,6 +50,11 @@
               <v-list-tile-title>Explore</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
+          <v-list-tile v-if="isAuthenticated" to="/myCourses" exact>
+            <v-list-tile-content class="ml-4">
+              <v-list-tile-title>My courses</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
           <v-list-tile v-if="isTeacher || isAdmin" to="/courses/create" exact>
             <v-list-tile-content class="ml-4">
               <v-list-tile-title>Create</v-list-tile-title>
