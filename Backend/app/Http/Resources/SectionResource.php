@@ -14,12 +14,22 @@ class SectionResource extends JsonResource
      */
     public function toArray($request)
     {
+        $user = auth()->user();
+        $userIsEnrolled = false;
+        $enrollment = \DB::table('enrollments')
+            ->where('user_id', $user->id)
+            ->where('course_id', $this->course->id)
+            ->get();
+        if($enrollment->isNotEmpty()) {
+            $userIsEnrolled = true;
+        }
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
             'order_number' => $this->order_number,
-            $this->mergeWhen(auth()->check(), [
+            $this->mergeWhen(auth()->check() && $userIsEnrolled, [
                 'videos' => VideoResource::collection($this->videos),
                 'documents' => DocumentResource::collection($this->documents),
                 'exams' => ExamResource::collection($this->exams),

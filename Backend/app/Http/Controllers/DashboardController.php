@@ -9,17 +9,32 @@ use Illuminate\Support\Collection;
 class DashboardController extends Controller
 {
     /**
+     * Create a new DashboardController instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function getDashboardData(Request $request)
     {
+        $user = auth()->user();
 
-        $allCourses = Course::get();
+        if($user->hasRole('admin')) {
+            $courses = Course::get();
+        } else {
+            $courses = $user->courses;
+        }
 
-        $mostPopularCourses = $this->getMostPopularCourses($allCourses);
-        $bestRatedCourses = $this->getBestRatedCourses($allCourses);
+        $mostPopularCourses = $this->getMostPopularCourses($courses);
+        $bestRatedCourses = $this->getBestRatedCourses($courses);
 
         return response([
             'mostPopularCourses' => $mostPopularCourses,
@@ -51,7 +66,7 @@ class DashboardController extends Controller
             return $value['students'];
         }, SORT_REGULAR, true)->all();
         $mostPopularCourses = array_values($mostPopularCourses);
-        return $mostPopularCourses;
+        return array_slice($mostPopularCourses, 0, 3);
     }
 
     /**
@@ -73,7 +88,7 @@ class DashboardController extends Controller
             return $value['score'];
         }, SORT_REGULAR, true)->all();
         $bestRatedCourses = array_values($bestRatedCourses);
-        return $bestRatedCourses;
+        return array_slice($bestRatedCourses, 0, 3);
     }
 
     /**

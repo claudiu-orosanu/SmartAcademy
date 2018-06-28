@@ -60,6 +60,7 @@
       </v-layout>
       <infinite-loading @infinite="infiniteHandler" ref="infiniteLoading" spinner="spiral">
         <span slot='no-more'></span>
+        <span slot='no-results'>No results.</span>
       </infinite-loading>
     </v-container>
 

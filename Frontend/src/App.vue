@@ -52,7 +52,7 @@
           </v-list-tile>
           <v-list-tile v-if="isAuthenticated" to="/myCourses" exact>
             <v-list-tile-content class="ml-4">
-              <v-list-tile-title>My courses</v-list-tile-title>
+              <v-list-tile-title>My Courses</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
           <v-list-tile v-if="isTeacher || isAdmin" to="/courses/create" exact>
@@ -67,7 +67,7 @@
             <v-icon>face</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>Teachers</v-list-tile-title>
+            <v-list-tile-title>Teacher Requests</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
 

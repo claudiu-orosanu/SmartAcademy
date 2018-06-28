@@ -204,6 +204,8 @@
             <v-layout row class="mt-4">
               <v-flex class="text-xs-center">
                 <v-btn
+                  :loading="creatingCourse"
+                  :disabled="creatingCourse"
                   class="secondary"
                   type="submit">Create course</v-btn>
               </v-flex>
@@ -259,6 +261,7 @@
         showCreateTestWindow: false,
 
         errors: [],
+        creatingCourse: false
       }
     },
 
@@ -309,8 +312,11 @@
           }
         }
 
+        this.creatingCourse = true;
+
         this.$store.dispatch('createCourse', course)
           .then(response => {
+            this.creatingCourse = false;
             this.showSnackbar('Course created', 'success', true, true);
             this.errors = [];
           })

@@ -1,7 +1,21 @@
 <template>
   <div>
 
-    <v-container>
+    <!--loading spinner-->
+    <v-container v-show="loading">
+      <v-layout>
+        <v-flex xs12 class="text-xs-center">
+          <v-progress-circular
+            indeterminate
+            class="primary--text"
+            :width="4"
+            :size="40"
+          ></v-progress-circular>
+        </v-flex>
+      </v-layout>
+    </v-container>
+
+    <v-container  v-show="!loading">
       <!--most popular courses-->
       <v-card>
         <v-card-title class="display-1">Most popular courses</v-card-title>
@@ -70,6 +84,7 @@
         mostPopularCourses: [],
         bestRatedCourses: [],
         backendUrl: backendUrl,
+        loading: true
       }
     },
 
@@ -77,9 +92,9 @@
       // get the user
       this.$store.dispatch('getDashboardData')
         .then((response) => {
-          console.log(response);
           this.mostPopularCourses = response.data.mostPopularCourses;
           this.bestRatedCourses = response.data.bestRatedCourses;
+          this.loading = false;
         })
         .catch(err => console.log(err))
     },
