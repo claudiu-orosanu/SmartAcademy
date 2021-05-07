@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.21",
     "vue": "^2.5.16",
     "vue-avatar": "^2.1.4",
     "vue-infinite-loading": "^2.3.1",
